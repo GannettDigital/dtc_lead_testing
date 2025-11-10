@@ -45,7 +45,10 @@
         }
 
         input[type="text"],
-        input[type="tel"] {
+        input[type="tel"],
+        input[type="email"],
+        select,
+        textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #dddfe2;
@@ -53,10 +56,18 @@
             box-sizing: border-box;
             font-size: 16px;
             transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
         }
 
         input[type="text"]:focus,
-        input[type="tel"]:focus {
+        input[type="tel"]:focus,
+        select:focus,
+        textarea:focus {
             border-color: #1877f2;
             box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
             outline: none;
@@ -82,7 +93,7 @@
 </head>
 <body>
     <div class="container">
-        <form action="#" method="post">
+        <form action="#" method="post" id="contactForm" novalidate>
             <h2>Contact Us</h2>
             <div class="form-group">
                 <label for="firstName">First Name</label>
@@ -106,16 +117,97 @@
             </div>
             <div class="form-group">
                 <label for="country">Country</label>
-                <input type="text" id="country" name="country" required>
+                <select id="country" name="country" required>
+                    <option value="USA"> United States</option>
+                    <option value="CAN"> Canada</option>
+                    <option value="AUS"> Australia</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email">
             </div>
             <div class="form-group">
                 <label for="phoneNumber">Phone Number</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                <input type="tel" id="phoneNumber" name="phoneNumber">
+            </div>
+            <div class="form-group">
+                <label for="comments">Comments</label>
+                <textarea id="comments" name="comments"></textarea>
             </div>
             <div class="form-group">
                 <button type="submit">Submit</button>
             </div>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('contactForm');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phoneNumber');
+
+            form.addEventListener('submit', function (event) {
+                // Prevent form submission to perform validation
+                event.preventDefault();
+
+                const emailValue = emailInput.value.trim();
+                const phoneValue = phoneInput.value.trim();
+
+                // Clear previous errors
+                clearErrors();
+
+                // Validation logic
+                if (!emailValue && !phoneValue) {
+                    showError(emailInput, 'Please provide either an email address or a phone number.');
+                    showError(phoneInput, 'Please provide either an email address or a phone number.');
+                    return;
+                }
+
+                if (emailValue && !isValidEmail(emailValue)) {
+                    showError(emailInput, 'Please enter a valid email address.');
+                    return;
+                }
+
+                if (phoneValue && !isValidPhone(phoneValue)) {
+                    showError(phoneInput, 'Please enter a valid phone number.');
+                    return;
+                }
+
+                // If validation passes
+                alert('Form submitted successfully!');
+                // In a real application, you would submit the form here:
+                // form.submit();
+            });
+
+            function isValidEmail(email) {
+                // Simple regex for email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            function isValidPhone(phone) {
+                // Regex to validate a phone number (allows for digits, spaces, dashes, parentheses)
+                const phoneRegex = /^[\d\s\-\(\)]+$/;
+                return phoneRegex.test(phone);
+            }
+
+            function showError(inputElement, message) {
+                const formGroup = inputElement.parentElement;
+                const error = document.createElement('div');
+                error.className = 'error-message';
+                error.style.color = 'red';
+                error.style.fontSize = '14px';
+                error.style.marginTop = '5px';
+                error.textContent = message;
+                formGroup.appendChild(error);
+            }
+
+            function clearErrors() {
+                const errorMessages = form.querySelectorAll('.error-message');
+                errorMessages.forEach(error => error.remove());
+            }
+        });
+    </script>
 </body>
 </html>
