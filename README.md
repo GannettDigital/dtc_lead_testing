@@ -11,4 +11,4 @@ Lead testing pages user by the Data Connect team
 
 The index.html page is found at https://gannettdigital.github.io/dtc_lead_testing
 
-Github pages deploys the latest from the gh_pages branch.  To make changes live, make them in the gh_pages branch.
+Github pages deploys the latest from the main branch.  To make changes live, make them in the main branch by submitting a pull request.
