@@ -1,213 +1,999 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+  <meta charset="utf-8" />
+  <title>LIPS Lead Testing Site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        .container {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
-            box-sizing: border-box;
-        }
+  <style>
+      /* ===== THEME TOKENS ===== */
+      :root {
+          --bg:#0b1320;
+          --panel:#121a2b;
+          --ink:#e9eefc;
+          --muted:#a9b3c9;
+          --accent:#5aa3ff;
+          --ok:#2ecc71;
+          --warn:#f39c12;
+          --err:#e74c3c;
 
-        h2 {
-            text-align: center;
-            color: #1c1e21;
-            margin-bottom: 25px;
-            font-size: 24px;
-        }
+          --input-bg:#162642;
+          --input-border:#6aa8ff;
+          --input-border-focus:#9bc7ff;
+      }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+      /* Layout + typography */
+      html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink);}
+      .wrap{max-width:960px;margin:24px auto;padding:0 20px;}            /* a bit more outer padding */
+      .card{background:var(--panel);border:1px solid #1f2a44;border-radius:14px;padding:22px;box-shadow:0 6px 20px rgb(0 0 0 / 18%);}
+      h1,h2{margin:0 0 12px;} h1{font-size:20px;} h2{font-size:16px;color:var(--muted);}
+      .footer{opacity:.75;font-size:12px;text-align:center;margin-top:18px;}
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #4b4f56;
-        }
+      /* Box model + grid spacing */
+      *,*::before,*::after{box-sizing:border-box;}
+      .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;} /* was 12px */
+      .row{display:flex;gap:12px;flex-wrap:wrap;}
+      .grid {
+          display: grid;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          gap: 12px;
+      }
+      /* ensure grid children can shrink inside columns */
+      .grid > * { min-width: 0; }
+      .col-1  { grid-column: span 1; }
+      .col-2  { grid-column: span 2; }
+      .col-3  { grid-column: span 3; }
+      .col-4  { grid-column: span 4; }
+      .col-5  { grid-column: span 5; }
+      .col-6  { grid-column: span 6; }
+      .col-7  { grid-column: span 7; }
+      .col-8  { grid-column: span 8; }
+      .col-9  { grid-column: span 9; }
+      .col-10 { grid-column: span 10; }
+      .col-11 { grid-column: span 11; }
+      .col-12 { grid-column: span 12; }
+      .hr{height:1px;background:#1f2a44;margin:18px 0;}
+      .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0a1022;border:1px solid #1f2a44;padding:2px 6px;border-radius:6px;}
 
-        input[type="text"],
-        input[type="tel"],
-        input[type="email"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #dddfe2;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            font-family: inherit;
-        }
+      /* Inputs */
+      label{display:block;font-size:12px;color:#c8d4ef;margin-bottom:6px;}
+      input,select,textarea{
+          width:100%;padding:12px 14px;border-radius:12px;background:var(--input-bg);
+          border:1px solid var(--input-border);color:var(--ink);outline:none;
+          transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease;
+      }
+      input:hover,select:hover,textarea:hover{border-color:var(--input-border-focus);}
+      input:focus,select:focus,textarea:focus{
+          border-color:var(--input-border-focus);
+          box-shadow:0 0 0 3px rgba(155,199,255,.25);
+      }
+      textarea{min-height:90px;resize:vertical;}
 
-        textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
+      /* Prevent grid children from pushing past the card on long content */
+      .card .grid > *{min-width:0;}
 
-        input[type="text"]:focus,
-        input[type="tel"]:focus,
-        select:focus,
-        textarea:focus {
-            border-color: #1877f2;
-            box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
-            outline: none;
-        }
+      /* Buttons */
+      .btn{appearance:none;border:1px solid #2a3e6f;background:#11204a;color:#dbe7ff;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600;}
+      .btn:hover{border-color:#395694;}
+      .btn.primary{background:linear-gradient(180deg,#2f66ff,#1254ff);border-color:#1e46d6;}
+      .btn.ghost{background:transparent;}
 
-        button[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #1877f2;
-            border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+      .hint{font-size:12px;color:var(--muted);}
+      .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#0f1a33;border:1px solid #26365f;}
+      .seg{display:flex;gap:8px;flex-wrap:wrap;}
+      .seg .btn{padding:6px 10px;border-radius:999px;}
 
-        button[type="submit"]:hover {
-            background-color: #166fe5;
-        }
-    </style>
+      /* Lead-type pill selected state */
+      .seg .btn[data-leadtype][aria-pressed="true"]{
+          background:#38a030;border-color:#2d7f27;color:#0b1320;
+          box-shadow:0 0 0 2px rgba(56,160,48,.28) inset,0 6px 18px rgba(56,160,48,.22);
+          transition:background .15s ease,box-shadow .15s ease,transform .04s ease;
+      }
+      .seg .btn[data-leadtype][aria-pressed="true"]:hover{background:#30902a;}
+      .seg .btn[data-leadtype][aria-pressed="true"]:active{transform:translateY(1px);}
+      .seg .btn[data-leadtype][aria-pressed="false"]:hover{border-color:#395694;background:#0f1a33;}
+      .seg .btn[data-leadtype]:focus-visible{outline:none;box-shadow:0 0 0 2px #0b1320,0 0 0 4px #38a030;border-color:#38a030;}
+
+      /* Status chip colors */
+      .status{font-size:12px;margin-left:auto;}
+      .status.ok{color:var(--ok);} .status.warn{color:var(--warn);} .status.err{color:var(--err);}
+
+      /* Dry-run on/off switch */
+      .switch{display:inline-flex;align-items:center;gap:10px;}
+      .switch .label{font-size:12px;color:var(--muted);}
+      .switch input{
+          appearance:none;width:44px;height:24px;border-radius:999px;background:#0e1730;border:1px solid #38a030;position:relative;cursor:pointer;outline:none;
+      }
+      .switch input::after{
+          content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#dbe7ff;transition:left .18s ease;
+      }
+      .switch input:checked{background:#38a030;}
+      .switch input:checked::after{left:22px;}
+
+      /* Network console states + toggle button */
+      #dbg.dbg-collapsed{max-height:7vh!important;}
+      #dbg.dbg-hidden{display:none!important;}
+      #dbgToggle{
+          position:fixed;right:12px;bottom:12px;z-index:10000;background:#122049;border:1px solid #2a3e6f;color:#fff;
+          border-radius:999px;padding:8px 12px;cursor:pointer;font:12px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+          box-shadow:0 6px 16px rgba(0,0,0,.35);
+      }
+
+      /* Combo box styling */
+      .combo{ position:relative; display:flex; align-items:center; }
+      .combo-input{ flex:1; padding-right:34px; } /* room for the button */
+      .combo-btn{
+          position:absolute; right:6px; top:50%; transform:translateY(-50%);
+          border:1px solid #2a3e6f; background:#0f1a33; color:#dbe7ff;
+          border-radius:8px; padding:2px 8px; cursor:pointer; font-weight:600;
+      }
+      .combo-btn:hover{ border-color:#395694; }
+      .combo-list{
+          position:absolute; top:calc(100% + 6px); left:0; right:0;
+          background:var(--panel); border:1px solid #2a3e6f; border-radius:10px;
+          box-shadow:0 8px 26px rgba(0,0,0,.45); max-height:220px; overflow:auto;
+          margin:0; padding:6px; list-style:none; z-index:9999;
+      }
+      .combo-list[hidden]{ display:none; }
+      .combo-item{
+          padding:8px 10px; border-radius:8px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      }
+      .combo-item:hover, .combo-item[aria-selected="true"]{ background:#0f1a33; }
+
+      /* Status badge */
+      .badge {
+          display:inline-flex; align-items:center; gap:6px;
+          padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600;
+          border:1px solid transparent; transition:opacity .18s ease, transform .12s ease;
+      }
+      .badge::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+      .badge-pending { color:#f39c12; background:#1e1606; border-color:#a06d10; }
+      .badge-ok      { color:#2ecc71; background:#0f1f16; border-color:#1b8e52; }
+      .badge-err     { color:#e74c3c; background:#2a0f0d; border-color:#b13b30; }
+
+      .badge-hidden  { opacity:0; pointer-events:none; transform:translateY(-2px); }
+      .badge-show    { opacity:1; transform:translateY(0); }
+  </style>
+
+  <script>
+    // Status badge helpers
+    let __statusHideTimer;
+    function setStatusBadge(state, text, tooltip) {
+      const el = document.getElementById('submitStatus');  // <- lookup at call time
+      if (!el) { console.warn('[status] #submitStatus not found yet'); return; }
+
+      clearTimeout(__statusHideTimer);
+
+      const cls = ['badge', 'badge-show'];
+      if (state === 'pending') cls.push('badge-pending');
+      if (state === 'ok')      cls.push('badge-ok');
+      if (state === 'err')     cls.push('badge-err');
+
+      el.className = cls.join(' ');
+      el.textContent = text;
+      if (tooltip) el.title = tooltip;
+
+      if (state !== 'pending') {
+        __statusHideTimer = setTimeout(() => { el.classList.add('badge-hidden'); }, 6000);
+      } else {
+        el.classList.remove('badge-hidden');
+      }
+    }
+  </script>
+
+  <!-- ========= Capture SDK Bootstrap ========= -->
+  <script>
+    (function () {
+      const qs = new URLSearchParams(location.search);
+      const DEFAULTS = {
+        siteid: "427e4e5f-5317-42d8-825c-765b49e43028",
+        scid: "3871830",
+        gmaid: "USA_172716",
+        e: "qa"
+      };
+      const cfg = {
+        siteid: qs.get("siteid") || DEFAULTS.siteid,
+        scid:   qs.get("scid")   || DEFAULTS.scid,
+        gmaid:  qs.get("gmaid")  || DEFAULTS.gmaid,
+        e:      (qs.get("e") || DEFAULTS.e).toLowerCase()
+      };
+
+      // The legacy Capture script expects rl_siteid globally
+      window.rl_siteid = cfg.siteid;
+      window.rl_scid   = cfg.scid;
+      window.rl_gmaid  = cfg.gmaid;
+
+      // Inject the QA (or prod) SDK over HTTPS to avoid mixed content on GitHub Pages
+      var s = document.createElement("script");
+      var host = (cfg.e === "qa" || cfg.e === "stage") ? "cdn-qa.rlets.com" : "cdn.rlets.com";
+      s.src = "https://" + host + "/capture_static/mms/mms.js?e=" + (cfg.e || "QA").toUpperCase();
+      s.async = true;
+      s.onload = function(){ console.log("[Capture SDK] loaded:", s.src); };
+      s.onerror = function(){ console.warn("[Capture SDK] failed to load:", s.src); };
+      document.head.appendChild(s);
+
+      // Expose for debugging
+      window.__captureBootstrap = { cfg, sdkSrc: s.src };
+      console.log("[Capture bootstrap]", window.__captureBootstrap);
+    })();
+  </script>
 </head>
+
 <body>
-    <div class="container">
-        <form action="#" method="post" id="contactForm" novalidate>
-            <h2>Contact Us Now!</h2>
-            <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input type="text" id="firstName" name="firstName" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" required>
-            </div>
-            <div class="form-group">
-                <label for="streetAddress">Street Address</label>
-                <input type="text" id="streetAddress" name="streetAddress" required>
-            </div>
-            <div class="form-group">
-                <label for="city">City</label>
-                <input type="text" id="city" name="city" required>
-            </div>
-            <div class="form-group">
-                <label for="state">State</label>
-                <input type="text" id="state" name="state" required>
-            </div>
-            <div class="form-group">
-                <label for="country">Country</label>
-                <select id="country" name="country" required>
-                    <option value="USA"> United States</option>
-                    <option value="CAN"> Canada</option>
-                    <option value="AUS"> Australia</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email">
-            </div>
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber">
-            </div>
-            <div class="form-group">
-                <label for="comments">Comments</label>
-                <textarea id="comments" name="comments"></textarea>
-            </div>
-            <div class="form-group">
-                <button type="submit">Submit</button>
-            </div>
-        </form>
+<div class="wrap">
+  <!-- CONFIG PANEL -->
+  <div class="card" id="configCard">
+    <div class="row" style="align-items:center;">
+      <h1>LIPS Lead Testing Site</h1>
+      <span id="captureStatus" class="status warn">Capture SDK not initialized</span>
     </div>
+    <div class="grid" style="margin-top:10px;">
+      <!-- SCID -->
+      <div class="col-4">
+        <label for="cfg-scid">scid</label>
+        <div class="combo" data-key="scid">
+          <input id="cfg-scid" class="combo-input" placeholder="e.g., 3871830" />
+          <button type="button" class="combo-btn" aria-label="Show presets">▾</button>
+          <ul class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <!-- siteid -->
+      <div class="col-8">
+        <label for="cfg-siteid">siteid</label>
+        <div class="combo" data-key="siteid">
+          <input id="cfg-siteid" class="combo-input" placeholder="e.g., 427e4e5f-..." />
+          <button type="button" class="combo-btn" aria-label="Show presets">▾</button>
+          <ul class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <!-- GMAID -->
+      <div class="col-6">
+        <label for="cfg-gmaid">gmaid</label>
+        <div class="combo" data-key="gmaid">
+          <input id="cfg-gmaid" class="combo-input" placeholder="e.g., USA_172716" />
+          <button type="button" class="combo-btn" aria-label="Show presets">▾</button>
+          <ul class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <!-- ENV -->
+      <div class="col-2">
+        <label for="cfg-env">environment</label>
+        <select id="cfg-env">
+          <option value="qa" selected>qa</option>
+          <option value="stage">stage</option>
+          <option value="prod">prod</option>
+        </select>
+      </div>
+      <div class="col-4" style="display:flex; align-items:flex-end; gap:8px;">
+        <button class="btn" id="applyCfgBtn" title="Update URL & re-init capture">Apply config</button>
+        <button class="btn ghost" id="resetCfgBtn" title="Reset to defaults">Reset</button>
+      </div>
+      <div class="col-12" style="display:flex;justify-content:flex-end;align-items:center;margin-top:4px;">
+        <div class="switch" title="When on, no lead is created; payload only logs.">
+          <span class="label">Dry-run</span>
+          <input type="checkbox" id="dryRun" />
+        </div>
+      </div>
+    </div>
+    <div class="hr"></div>
+    <div class="row" style="align-items:center; justify-content:space-between;">
+      <div class="seg" role="tablist" aria-label="Lead Type">
+        <span class="pill">Lead type:</span>
+        <button class="btn" data-leadtype="web" aria-pressed="true">Web Form</button>
+        <button class="btn" data-leadtype="call" aria-pressed="false">Call</button>
+        <button class="btn" data-leadtype="chatbot" aria-pressed="false">Chatbot</button>
+      </div>
+      <div class="hint">Config persists in the page URL so you can share the link</div>
+    </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('contactForm');
-            const emailInput = document.getElementById('email');
-            const phoneInput = document.getElementById('phoneNumber');
+  <div style="height:16px;"></div>
 
-            form.addEventListener('submit', function (event) {
-                // Prevent form submission to perform validation
-                event.preventDefault();
+  <!-- LEAD FORM -->
+  <form class="card" id="leadForm" novalidate>
+    <h2>Lead Form</h2>
+    <div class="grid">
+      <div class="col-6">
+        <label for="first_name">First Name</label>
+        <input id="first_name" name="first_name" autocomplete="given-name" />
+      </div>
+      <div class="col-6">
+        <label for="last_name">Last Name</label>
+        <input id="last_name" name="last_name" autocomplete="family-name" />
+      </div>
 
-                const emailValue = emailInput.value.trim();
-                const phoneValue = phoneInput.value.trim();
+      <div class="col-6">
+        <label for="email">Email <span class="hint">(email OR phone required)</span></label>
+        <input id="email" name="email" type="email" autocomplete="email" />
+        <input id="xhr_form_email" name="xhr_form_email" type="hidden" />
+      </div>
+      <div class="col-6">
+        <label for="phone">Phone <span class="hint">(email OR phone required)</span></label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" />
+        <input id="xhr_form_phone" name="xhr_form_phone" type="hidden" />
+      </div>
 
-                // Clear previous errors
-                clearErrors();
+      <div class="col-12"><div class="hr"></div></div>
 
-                // Validation logic
-                if (!emailValue && !phoneValue) {
-                    showError(emailInput, 'Please provide either an email address or a phone number.');
-                    showError(phoneInput, 'Please provide either an email address or a phone number.');
-                    return;
-                }
+      <div class="col-8">
+        <label for="address1">Address 1</label>
+        <input id="address1" name="address1" autocomplete="address-line1" />
+      </div>
+      <div class="col-4">
+        <label for="address2">Address 2</label>
+        <input id="address2" name="address2" autocomplete="address-line2" />
+      </div>
 
-                if (emailValue && !isValidEmail(emailValue)) {
-                    showError(emailInput, 'Please enter a valid email address.');
-                    return;
-                }
+      <div class="col-5">
+        <label for="city">City</label>
+        <input id="city" name="city" autocomplete="address-level2" />
+      </div>
+      <div class="col-3">
+        <label for="state">State/Province</label>
+        <input id="state" name="state" maxlength="32" />
+      </div>
+      <div class="col-4">
+        <label for="postal_code">ZIP/Postal Code</label>
+        <input id="postal_code" name="postal_code" autocomplete="postal-code" />
+      </div>
 
-                if (phoneValue && !isValidPhone(phoneValue)) {
-                    showError(phoneInput, 'Please enter a valid phone number.');
-                    return;
-                }
+      <div class="col-12">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" placeholder="Free-form text to help identify the test lead in LIPS…"></textarea>
+      </div>
 
-                // If validation passes
-                alert('Form submitted successfully!');
-                // In a real application, you would submit the form here:
-                // form.submit();
-            });
+      <div class="col-12 row" style="align-items:center; justify-content:space-between;">
+        <div class="hint">On submit, we call the Capture API if available; otherwise we log a payload (“dry-run”).</div>
+        <div class="row" style="gap:8px;">
+          <span id="submitStatus" class="badge badge-hidden" aria-live="polite" title="Submission status"></span>
+          <button type="button" class="btn" id="fillDemo">Fill demo data</button>
+          <button type="submit" class="btn primary">Create Lead</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
 
-            function isValidEmail(email) {
-                // Simple regex for email validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
-            }
+<!-- ===== Network Console (logs fetch + XHR) ===== -->
+<div id="dbg" style="position:fixed;right:12px;bottom:56px;left:12px;background:#0b1020;border:1px solid #1f2a44;border-radius:10px;padding:10px;max-height:35vh;overflow:auto;font:12px ui-monospace,Menlo,monospace;color:#dbe7ff;z-index:9999;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+    <strong>Network Console</strong>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="dbgCollapse" style="background:#122049;border:1px solid #2a3e6f;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;">Collapse</button>
+      <button id="dbgExpand"   style="background:#122049;border:1px solid #2a3e6f;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;">Expand</button>
+      <button id="dbgCopy"     style="background:#122049;border:1px solid #2a3e6f;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;">Copy</button>
+      <button id="dbgClear"    style="background:#122049;border:1px solid #2a3e6f;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;">Clear</button>
+      <button id="dbgHide"     style="background:#122049;border:1px solid #2a3e6f;color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;">Hide</button>
+    </div>
+  </div>
+  <pre id="dbgOut" style="white-space:pre-wrap;margin:8px 0 0;"></pre>
+</div>
 
-            function isValidPhone(phone) {
-                // Regex to validate a phone number (allows for digits, spaces, dashes, parentheses)
-                const phoneRegex = /^[\d\s\-\(\)]+$/;
-                return phoneRegex.test(phone);
-            }
+<!-- Floating toggle (appears when console hidden) -->
+<button id="dbgToggle" title="Show network console">Show Console</button>
 
-            function showError(inputElement, message) {
-                const formGroup = inputElement.parentElement;
-                const error = document.createElement('div');
-                error.className = 'error-message';
-                error.style.color = 'red';
-                error.style.fontSize = '14px';
-                error.style.marginTop = '5px';
-                error.textContent = message;
-                formGroup.appendChild(error);
-            }
+<script>
+  (function(){
+    const dbg   = document.getElementById('dbg');
+    const out   = document.getElementById('dbgOut');
+    const btnCopy  = document.getElementById('dbgCopy');
+    const btnClear = document.getElementById('dbgClear');
+    const btnHide  = document.getElementById('dbgHide');
+    const btnCol   = document.getElementById('dbgCollapse');
+    const btnExp   = document.getElementById('dbgExpand');
+    const btnToggle= document.getElementById('dbgToggle');
 
-            function clearErrors() {
-                const errorMessages = form.querySelectorAll('.error-message');
-                errorMessages.forEach(error => error.remove());
-            }
+    const saveState = (s) => { try { localStorage.setItem('dbg.state', s); } catch {} };
+    const loadState = ()   => { try { return localStorage.getItem('dbg.state') || 'open'; } catch { return 'open'; } };
+
+    function applyState(state){
+      dbg.classList.remove('dbg-collapsed','dbg-hidden');
+      if (state === 'hidden')   dbg.classList.add('dbg-hidden');
+      if (state === 'collapsed')dbg.classList.add('dbg-collapsed');
+      btnToggle.style.display = (state === 'hidden') ? 'block' : 'none';
+      saveState(state);
+    }
+
+    // header buttons
+    btnClear.onclick = () => out.textContent = '';
+    btnCopy.onclick  = async () => {
+      try { await navigator.clipboard.writeText(out.textContent); alert('Console copied'); } catch {}
+    };
+    btnHide.onclick  = () => applyState('hidden');
+    btnCol.onclick   = () => applyState('collapsed');
+    btnExp.onclick   = () => applyState('open');
+
+    // floating toggle
+    btnToggle.onclick = () => applyState('open');
+
+    // Keyboard shortcut: press ` (backtick) to toggle collapse/open
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '`' && !e.metaKey && !e.ctrlKey) {
+        const cur = loadState();
+        applyState(cur === 'collapsed' ? 'open' : 'collapsed');
+      }
+    });
+
+    // Logging helpers
+    const log = (label, obj) => {
+      try {
+        out.textContent += `\n${label}\n` + JSON.stringify(obj, null, 2) + '\n';
+        out.scrollTop = out.scrollHeight;
+      } catch(e) { out.textContent += `\n${label} (unserializable)\n`; }
+    };
+
+    // Patch fetch
+    const _fetch = window.fetch;
+    window.fetch = async (...args) => {
+      const [input, init] = args;
+      log('→ fetch request', { url: (input&&input.url)||input, ...init });
+      try {
+        const res = await _fetch(...args);
+        const clone = res.clone();
+        let bodyText = '';
+        try { bodyText = await clone.text(); } catch {}
+        log('← fetch response', { url: (input&&input.url)||input, status: res.status, headers: Object.fromEntries(res.headers.entries()), body: bodyText?.slice(0, 4000) });
+        return res;
+      } catch (e) {
+        log('✖ fetch error', { url: (input&&input.url)||input, error: String(e) });
+        throw e;
+      }
+    };
+
+    // Patch XHR
+    const _xhr = window.XMLHttpRequest;
+    function XHR(){
+      const x = new _xhr();
+      let req = { method: '', url: '', headers: {} };
+      const origOpen = x.open;
+      const origSend = x.send;
+      const origSetHeader = x.setRequestHeader;
+      x.open = function(method, url, ...rest){ req.method = method; req.url = url; return origOpen.call(this, method, url, ...rest); };
+      x.setRequestHeader = function(k,v){ req.headers[k]=v; return origSetHeader.call(this,k,v); };
+      x.send = function(body){
+        log('→ xhr request', { ...req, body });
+        this.addEventListener('loadend', function(){
+          log('← xhr response', { url: req.url, status: x.status, response: (x.responseText||'').slice(0,4000) });
         });
-    </script>
+        return origSend.call(this, body);
+      };
+      return x;
+    }
+    window.XMLHttpRequest = XHR;
+
+    // Boot with last state
+    applyState(loadState());
+    window.__dbglog = log;
+  })();
+</script>
+<!-- ============================================ -->
+
+<script>
+  // utility to read/write query params (so config survives refresh/share)
+  const qs = new URLSearchParams(location.search);
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  // Default config
+  const DEFAULTS = {
+    scid: "3871830",
+    siteid: "427e4e5f-5317-42d8-825c-765b49e43028",
+    gmaid: "USA_172716",
+    env: "qa",
+    leadtype: "web",
+    dryrun: "1"
+  };
+
+  // Normalize our UI lead-type to LIPS-friendly event types
+  /*
+   These I believe are what is valid within LIPS?
+    {
+        "attribute": "event_type",
+        "message": "must be one of: call, chat, chat_sales, chat_service, chat_other, form, email, fpd, booking, lsa, diy_post, facebook, promotion, post, sms"
+    }
+   */
+  const leadtypeToEventType = {
+    web:     'form',
+    call:    'call',
+    chatbot: 'chat',
+  };
+
+  function getCfg() {
+    return {
+      scid: $("#cfg-scid").value.trim(),
+      siteid: $("#cfg-siteid").value.trim(),
+      gmaid: $("#cfg-gmaid").value,
+      env: $("#cfg-env").value,
+      leadtype: document.querySelector('[data-leadtype][aria-pressed="true"]')?.dataset.leadtype || "web",
+      dryrun: $("#dryRun")?.checked ? "1" : "0"
+    };
+  }
+
+  function applyCfgToURL(cfg) {
+    const newQs = new URLSearchParams(location.search);
+    Object.entries(cfg).forEach(([k, v]) => newQs.set(k, v));
+    history.replaceState({}, "", `${location.pathname}?${newQs.toString()}`);
+  }
+
+  function setStatus(text, cls = "warn") {
+    const el = $("#captureStatus");
+    el.textContent = text;
+    el.className = `status ${cls}`;
+  }
+
+  function hydrateFormFromQS() {
+    const cfg = { ...DEFAULTS };
+    ["scid","siteid","gmaid","env","leadtype","dryrun"].forEach(k => {
+      if (qs.get(k)) cfg[k] = qs.get(k);
+    });
+    $("#cfg-scid").value = cfg.scid;
+    $("#cfg-siteid").value = cfg.siteid;
+    $("#cfg-gmaid").value = cfg.gmaid;
+    $("#cfg-env").value = cfg.env;
+    $("#dryRun").checked = cfg.dryrun === "1";
+    // toggle buttons
+    $$('.seg .btn[data-leadtype]').forEach(b => {
+      b.setAttribute("aria-pressed", b.dataset.leadtype === cfg.leadtype ? "true" : "false");
+    });
+    applyCfgToURL(cfg);
+  }
+
+  // Only fields that don't have their own internal sync logic
+  ['#cfg-env'].forEach(sel => {
+    document.querySelector(sel)?.addEventListener('change', () => applyCfgToURL(getCfg()));
+    document.querySelector(sel)?.addEventListener('input',  () => applyCfgToURL(getCfg()));
+  });
+
+  // Mirror fields to xhr_form_* variants
+  function wireMirrors() {
+    const mirrorPairs = [
+      ["#email", "#xhr_form_email"],
+      ["#phone", "#xhr_form_phone"],
+    ];
+    mirrorPairs.forEach(([srcSel, dstSel]) => {
+      const src = $(srcSel), dst = $(dstSel);
+      if (src && dst) src.addEventListener("input", () => { dst.value = src.value; });
+    });
+  }
+
+  // Build a canonical payload to pass to Capture, or log in dry-run mode
+  function buildPayload() {
+    const cfg = getCfg();
+    const payload = {
+      meta: { ...cfg, ts: new Date().toISOString() },
+      lead: {
+        first_name: $("#first_name").value.trim(),
+        last_name: $("#last_name").value.trim(),
+        email: $("#email").value.trim(),
+        phone: $("#phone").value.trim(),
+        address1: $("#address1").value.trim(),
+        address2: $("#address2").value.trim(),
+        city: $("#city").value.trim(),
+        state: $("#state").value.trim(),
+        postal_code: $("#postal_code").value.trim(),
+        notes: $("#notes").value.trim(),
+        channel: cfg.leadtype,
+      }
+    };
+    return payload;
+  }
+
+  // Validation: require email OR phone
+  function validateLead(payload) {
+    const hasEmail = !!payload.lead.email;
+    const hasPhone = !!payload.lead.phone;
+    if (!hasEmail && !hasPhone) {
+      alert("Please provide at least an Email OR a Phone number.");
+      return false;
+    }
+    return true;
+  }
+
+  // Reinitialize Capture with current config
+  async function reinitCapture() {
+    const cfg = getCfg();
+    applyCfgToURL(cfg);
+    try {
+      if (window.Capture && typeof window.Capture.init === "function") {
+        await window.Capture.init({ scid: cfg.scid, siteid: cfg.siteid, gmaid: cfg.gmaid, env: cfg.env });
+        setStatus("Capture initialized", "ok");
+      } else if (window.Capture && typeof window.Capture.reinitialize === "function") {
+        await window.Capture.reinitialize({ scid: cfg.scid, siteid: cfg.siteid, gmaid: cfg.gmaid, env: cfg.env });
+        setStatus("Capture reinitialized", "ok");
+      } else if (window.rl_siteid) {
+        // Legacy scripts auto-init from rl_siteid + query params
+        setStatus("Capture script loaded", "ok");
+      } else {
+        setStatus("Capture SDK not found — dry-run mode", "warn");
+      }
+    } catch (e) {
+      console.error("Capture init error", e);
+      setStatus("Capture init failed — check console", "err");
+    }
+  }
+
+  // Submit handler: call Capture if present; otherwise dry-run
+  async function submitLead(evt) {
+    evt.preventDefault();
+    setStatusBadge('pending', 'Submitting…', 'Sending payload to Capture');
+
+    // Read config + form values
+    const cfg = getCfg();
+
+    /** HARD STOP for prod right now -- need to figure out how to secure this if we want it available */
+    if ((cfg.env || '').toLowerCase() === 'prod') {
+      setStatusBadge('err', 'Blocked', 'Prod submissions are disabled on this test page');
+      alert('Submission blocked.\n\nThis page only allows QA/Stage. Set environment to "qa" or "stage".');
+      return;
+    }
+
+    const first = $("#first_name").value.trim();
+    const last  = $("#last_name").value.trim();
+    const email = $("#email").value.trim();
+    const phone = $("#phone").value.trim();
+    const eventType = leadtypeToEventType[cfg.leadtype] || 'form';
+
+    if (cfg.dryrun === "1") {
+      const demo = buildPayload();
+      demo.meta.event_type = eventType;
+
+      setStatusBadge('ok', 'Dry-run only', 'Payload logged; no network request made');
+      (window.__dbglog || console.log)('[dry-run payload]', demo);
+      return;
+    }
+
+    // Require email OR phone
+    if (!email && !phone) {
+      alert("Please provide at least an Email OR a Phone number.");
+      return;
+    }
+
+    // Build the URL-encoded postbody exactly like the original
+    const postbody = new URLSearchParams({
+      // Use the exact key names the original expects:
+      company___required: "",                // no company field in our UI
+      address1___required: $("#address1").value.trim(),
+      email___required: email,
+      first_name___required: first,
+      title___required: "",                  // no title field in our UI
+      last_name___required: last,
+      phone___required: phone,
+      phone_work___required: "",             // n/a
+      phone_mobile___required: "",           // n/a
+      phone_home___required: "",             // n/a
+      address_2: $("#address2").value.trim(),
+      city___required: $("#city").value.trim(),
+      // their sample had a weird "state:" key once; we’ll use the common one:
+      state: $("#state").value.trim(),
+      country: "",                           // n/a
+      postal___required: $("#postal_code").value.trim(),
+      message: $("#notes").value.trim(),
+      campaign_id: "",
+      campaign_name: "",
+      submit_button: "SUBMIT",
+      event_type: eventType,
+      lead_type:  cfg.leadtype,
+    }).toString();
+
+    // Build the JSON wrapper like the original
+    // TODO GSW -- is this correct
+    const captureVersion = "4fed22fa9901d7d6a11e2f92f6fb1bbd593dd039"; // same as original
+    const nowHref = location.href;
+    const ref = document.referrer || nowHref;
+
+    const payload = {
+      global_master_advertiser_id: cfg.gmaid || "USA_172716",
+      page_name: "",
+      fname: nowHref,
+      referrer: ref,
+      capture_version: captureVersion,
+      utm_data: "",
+      ecid: "",
+      ohid: "",
+      scid: cfg.scid,
+      tc: "",
+      kw: "",
+      pub_cr_id: "",
+      campaign_id: "",
+      master_campaign_id: "",
+      referrer_source: "DIRECT",
+      vendor_transaction_id: "",
+      id_creative_resource: "",
+      visitor_id: (window.Capture && window.Capture.getVisitorId && window.Capture.getVisitorId()) || "",
+      visit_id: (window.Capture && window.Capture.getVisitId && window.Capture.getVisitId()) || "",
+      referrer_type: "DIRECT",
+      formUri: nowHref,          // original used page URL here
+      postbody,
+      hidden_fields: "campaign_id,campaign_name,submit_button",
+      rl_eid: "trackPost-" + Math.random().toString(36).slice(2, 10),
+      version: captureVersion,
+      event_type_hint: eventType
+    };
+
+    // POST
+    const host = `${cfg.siteid}.qa15.rlets.com`;
+    const url = `https://${host}/api/v1/posts`;
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      // The endpoint often returns empty/204-ish; treat 2xx as success
+      if (res.ok) {
+        setStatusBadge('ok', 'Success', 'Capture accepted the lead (HTTP ' + res.status + ')');
+        rememberPresets();
+      } else {
+        setStatusBadge('err', 'Failed', 'See console for details');
+        const text = await res.text().catch(() => "");
+        console.error("Capture submit non-OK", res.status, text);
+        alert(`Submit returned ${res.status} — check console for details.`);
+      }
+    } catch (e) {
+      console.error("Capture submit failed", e);
+      alert("Submit failed — check console for details.");
+    }
+  }
+
+  // Re-wire the handler
+  $("#leadForm")?.removeEventListener("submit", submitLead);
+  $("#leadForm")?.addEventListener("submit", submitLead);
+
+  // Demo autofill
+  function fillDemo() {
+    $("#first_name").value = "Casey";
+    $("#last_name").value = "Tester";
+    $("#email").value = "casey.tester@example.com";
+    $("#phone").value = "555-867-5309";
+    $("#address1").value = "123 Demo Street";
+    $("#address2").value = "Apt 4B";
+    $("#city").value = "Phoenix";
+    $("#state").value = "AZ";
+    $("#postal_code").value = "85001";
+    $("#notes").value = "QA demo lead for LIPS ingestion.";
+    $("#xhr_form_email").value = $("#email").value;
+    $("#xhr_form_phone").value = $("#phone").value;
+  }
+
+  // Lead type toggle buttons
+  function wireLeadTypeToggles() {
+    $$('.seg .btn[data-leadtype]').forEach(btn => {
+      btn.addEventListener("click", () => {
+        $$('.seg .btn[data-leadtype]').forEach(b => b.setAttribute("aria-pressed", "false"));
+        btn.setAttribute("aria-pressed", "true");
+        applyCfgToURL(getCfg());
+      });
+    });
+  }
+
+  // Buttons
+  $("#applyCfgBtn")?.addEventListener("click", reinitCapture);
+  $("#resetCfgBtn")?.addEventListener("click", () => {
+    Object.entries(DEFAULTS).forEach(([k,v]) => qs.set(k,v));
+    location.search = "?" + qs.toString(); // reload w/ defaults
+  });
+  $("#fillDemo")?.addEventListener("click", fillDemo);
+  // Keep URL in sync when Dry-run is toggled
+  $("#dryRun")?.addEventListener("change", () => {
+    applyCfgToURL(getCfg());
+  });
+
+  // Boot
+  hydrateFormFromQS();
+  wireMirrors();
+  wireLeadTypeToggles();
+  reinitCapture();
+
+  // Keep mirrors live
+  $("#email")?.addEventListener("input", () => $("#xhr_form_email").value = $("#email").value);
+  $("#phone")?.addEventListener("input", () => $("#xhr_form_phone").value = $("#phone").value);
+</script>
+
+<script>
+  /* Manage combo boxes -- save inputs for gmaid/scid/siteid to local storage for custom drop downs
+   * Preset sources, will be merged with per-browser memory.
+   */
+  const SEED_PRESETS = {
+    gmaid:  ['USA_172716','USA_636409'],
+    scid:   ['3871830','4870939'],
+    siteid: ['427e4e5f-5317-42d8-825c-765b49e43028','8a0749e8-18f1-47b1-86df-64660c07e822'],
+  };
+
+  const PRESET_KEYS = {
+    gmaid:  'presets:gmaid',
+    scid:   'presets:scid',
+    siteid: 'presets:siteid',
+  };
+
+  function loadPresets(key, seed=[]) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || '[]');
+      const all = [...seed, ...saved];
+      return Array.from(new Set(all)); // de-dupe
+    } catch { return seed; }
+  }
+
+  function savePreset(key, value) {
+    const v = (value||'').trim(); if (!v) return;
+    const cur = loadPresets(key);
+    if (!cur.includes(v)) {
+      cur.unshift(v);
+      try { localStorage.setItem(key, JSON.stringify(cur.slice(0, 20))); } catch {}
+    }
+  }
+
+  function closeAllCombos(exceptEl){
+    document.querySelectorAll('.combo-list').forEach(ul=>{
+      if (!exceptEl || ul !== exceptEl) ul.hidden = true;
+    });
+  }
+
+  function rememberPresets() {
+    const cfg = getCfg();
+    savePreset(PRESET_KEYS.gmaid,  cfg.gmaid);
+    savePreset(PRESET_KEYS.scid,   cfg.scid);
+    savePreset(PRESET_KEYS.siteid, cfg.siteid);
+  }
+
+  function buildCombo(root, initialPresets) {
+    const input = root.querySelector('.combo-input');
+    const btn   = root.querySelector('.combo-btn');
+    const list  = root.querySelector('.combo-list');
+    const key   = root.getAttribute('data-key'); // 'gmaid' | 'scid' | 'siteid'
+    let presets = initialPresets.slice();
+
+    function render(filter=''){
+      list.innerHTML = '';
+      const f = filter.trim().toLowerCase();
+      const items = presets.filter(p => !f || p.toLowerCase().includes(f));
+      if (items.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'combo-item';
+        li.textContent = 'No matches';
+        li.setAttribute('aria-disabled','true');
+        li.setAttribute('role','option');
+        list.appendChild(li);
+        return;
+      }
+      items.forEach((preset, i) => {
+        const li = document.createElement('li');
+        li.className = 'combo-item';
+        li.textContent = preset;
+        li.tabIndex = -1;
+        li.setAttribute('role','option');
+        li.setAttribute('aria-selected', i === 0 ? 'true' : 'false'); // select first by default
+        li.addEventListener('click', () => {
+          input.value = preset;
+          list.hidden = true;
+          input.dispatchEvent(new Event('input'));
+          input.dispatchEvent(new Event('change'));
+          input.focus();
+        });
+        list.appendChild(li);
+      });
+    }
+
+    function open(){
+      // refresh from localStorage each time the menu opens
+      presets = loadPresets(PRESET_KEYS[key], SEED_PRESETS[key] || []);
+      render('');                // show all on open
+      closeAllCombos(list);
+      list.hidden = false;
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (list.hidden) open(); else list.hidden = true;
+    });
+
+    input.addEventListener('input', () => {
+      render(input.value);
+      applyCfgToURL(getCfg());
+    });
+
+    input.addEventListener('focus', open);
+
+    input.addEventListener('keydown', (e) => {
+      if (list.hidden) return;
+      const items = Array.from(list.querySelectorAll('.combo-item:not([aria-disabled])'));
+      const idx = items.findIndex(li => li.getAttribute('aria-selected') === 'true');
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const nextIndex = e.key === 'ArrowDown' ? Math.min(idx + 1, items.length - 1)
+          : Math.max(idx - 1, 0);
+        items.forEach(li => li.setAttribute('aria-selected','false'));
+        items[nextIndex].setAttribute('aria-selected','true');
+        items[nextIndex].scrollIntoView({block:'nearest'});
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        const cur = items[idx] || items[0];
+        if (cur) cur.click();
+        if (e.key === 'Enter') e.preventDefault(); // keep focus
+      } else if (e.key === 'Escape') {
+        list.hidden = true;
+      }
+    });
+
+    // Close when clicking elsewhere
+    document.addEventListener('click', () => { list.hidden = true; }, { passive: true });
+
+    // Initial paint
+    render('');
+  }
+
+  // Build the three combos + seed from localStorage
+  (function initCombos(){
+    const combos = document.querySelectorAll('.combo');
+    combos.forEach(root => {
+      const key = root.getAttribute('data-key');
+      if (!key) return;
+      const presets = loadPresets(PRESET_KEYS[key], SEED_PRESETS[key] || []);
+      buildCombo(root, presets);
+    });
+
+    document.getElementById('applyCfgBtn')?.addEventListener('click', rememberPresets);
+  })();
+</script>
+
+<!-- Tool Tips -->
+<script>
+  (function () {
+    const tips = [
+      // Config panel
+      ['#applyCfgBtn',
+        'Update the page URL with current config and re-initialize Capture. Does NOT submit a lead.'],
+      ['#resetCfgBtn',
+        'Reload the page with default config (clears the form).'],
+      ['#cfg-scid',
+        'SCID (campaign/source ID) used by Capture and routing.'],
+      ['#cfg-siteid',
+        'Site identifier (rl_siteid) recognized by Capture.'],
+      ['#cfg-gmaid',
+        'GMAID mapping used for routing (pick a test account).'],
+      ['#cfg-env',
+        'Target backend environment: qa, stage, or prod.'],
+      ['#dryRun',
+        'When ON, no lead is created—payload only logs in the console.'],
+
+      // Lead type pills
+      ['.seg .btn[data-leadtype="web"]',
+        'Send as a Web Form lead.'],
+      ['.seg .btn[data-leadtype="call"]',
+        'Send as a Call lead.'],
+      ['.seg .btn[data-leadtype="chatbot"]',
+        'Send as a Chatbot lead.'],
+
+      // Form actions
+      ['#fillDemo',
+        'Autofill the form with demo values (no submit).'],
+      ['#leadForm .btn.primary',
+        'Validate and submit the lead (respects Dry-run setting).'],
+
+      // Network console controls
+      ['#dbgCollapse',
+        'Collapse (shrink) the network console.'],
+      ['#dbgExpand',
+        'Expand the network console.'],
+      ['#dbgCopy',
+        'Copy the console output to your clipboard.'],
+      ['#dbgClear',
+        'Clear the console output.'],
+      ['#dbgHide',
+        'Hide the network console. Use the “Net” button or the backtick (`) key to show it again.'],
+      ['#dbgToggle',
+        'Show the network console.']
+    ];
+
+    tips.forEach(([sel, title]) => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.setAttribute('title', title);
+        if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', title);
+      });
+    });
+  })();
+</script>
 </body>
 </html>
