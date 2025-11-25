@@ -435,10 +435,19 @@ let lastSites = []; // cache sites for current GMAID
 
 const apiBaseForEnv = env => {
   const e = (env || 'stage').toLowerCase();
-  if (e === 'qa') return 'https://api-qa.gcion.com/apgb2b-reachcodeandproxy';
-  if (e === 'prod') return 'https://api.gcion.com/apgb2b-reachcodeandproxy';
+
+  // QA + Stage share the same host
+  if (e === 'qa' || e === 'stage') {
+    return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
+  }
+
+  if (e === 'prod') {
+    return 'https://api.gcion.com/apgb2b-reachcodeandproxy';
+  }
+
   return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
 };
+
 
 /**
  * Fetch sites by GMAID and populate the SCID <select>.
