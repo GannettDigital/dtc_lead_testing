@@ -1,8 +1,9 @@
 /* eslint-disable no-alert */
 
-const qs = new URLSearchParams(location.search);
-const $  = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+// ===== Small helpers =====
+const qs  = new URLSearchParams(location.search);
+const $   = sel => document.querySelector(sel);
+const $$  = sel => Array.from(document.querySelectorAll(sel));
 
 // Only these go into the URL (no api key!)
 const URL_CFG_KEYS = ['scid','siteid','gmaid','env','leadtype','dryrun'];
@@ -24,7 +25,7 @@ const leadtypeToEventType = {
   chatbot: 'chat',
 };
 
-// ===== Helper: Capture status text =====
+// Simple status text in config card
 const setCaptureStatus = (text, cls = 'warn') => {
   const el = $('#captureStatus');
   if (!el) return;
@@ -425,128 +426,15 @@ const initCombos = () => {
     const presets = loadPresets(PRESET_KEYS[key], SEED_PRESETS[key] || []);
     buildCombo(root, presets);
   });
-
-  $('#applyCfgBtn')?.addEventListener('click', rememberPresets);
 };
 
-// ===== NEW: GMAID lookup → SCID dropdown =====
-
-let lastSites = []; // cache sites for current GMAID
-
-const apiBaseForEnv = env => {
-  const e = (env || 'stage').toLowerCase();
-
-  // QA + Stage share the same host
-  if (e === 'qa' || e === 'stage') {
-    return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
-  }
-
-  if (e === 'prod') {
-    return 'https://api.gcion.com/apgb2b-reachcodeandproxy';
-  }
-
-  return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
-};
-
-
-/**
- * Fetch sites by GMAID and populate the SCID <select>.
- * NOTE: header name x-api-key / base URLs may need tweaking to match real API.
- */
-const lookupGmaidAndPopulateScids = async () => {
-  const { gmaid, env, apiKey } = getCfg();
-  const scidSelect = $('#cfg-scid');
-
-  if (!gmaid) {
-    scidSelect.innerHTML = '<option value="">– enter GMAID first –</option>';
-    lastSites = [];
-    return;
-  }
-
-  if (!apiKey) {
-    alert('Please enter an API key before looking up GMAID.');
-    return;
-  }
-
-  const base = apiBaseForEnv(env);
-  const url = `${base}/sites?global_master_advertiser_id=${encodeURIComponent(gmaid)}`;
-
-  setCaptureStatus('Looking up sites for GMAID…', 'warn');
-
-  try {
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'x-api-key': apiKey    // <-- adjust if your API uses a different header name
-      }
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      console.error('GMAID lookup failed', res.status, text);
-      alert(`GMAID lookup failed with status ${res.status}. See console for details.`);
-      setCaptureStatus('GMAID lookup failed', 'err');
-      return;
-    }
-
-    const data = await res.json();
-    lastSites = Array.isArray(data) ? data : [];
-
-    scidSelect.innerHTML = '';
-
-    if (!lastSites.length) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = 'No sites found for this GMAID';
-      scidSelect.appendChild(opt);
-      setCaptureStatus('No sites found for this GMAID', 'warn');
-      return;
-    }
-
-    // Build options: use id as SCID, show id + URL
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = '– select SCID –';
-    scidSelect.appendChild(placeholder);
-
-    lastSites.forEach(site => {
-      const opt = document.createElement('option');
-      opt.value = site.id;
-      opt.textContent = `${site.id} — ${site.url || 'no URL'}`;
-      scidSelect.appendChild(opt);
-    });
-
-    setCaptureStatus(`Loaded ${lastSites.length} site(s) for GMAID`, 'ok');
-
-  } catch (err) {
-    console.error('GMAID lookup error', err);
-    alert('GMAID lookup failed — check console for details.');
-    setCaptureStatus('GMAID lookup error', 'err');
-  }
-};
-
-// When SCID changes, auto-fill siteid from capture_code_uuid
-const wireScidChangeToSiteid = () => {
-  const scidSelect = $('#cfg-scid');
-  if (!scidSelect) return;
-
-  scidSelect.addEventListener('change', () => {
-    const scid = scidSelect.value;
-    const site = lastSites.find(s => String(s.id) === String(scid));
-    if (site && site.capture_code_uuid && $('#cfg-siteid')) {
-      $('#cfg-siteid').value = site.capture_code_uuid;
-    }
-    applyCfgToURL(getCfg());
-  });
-};
-
-// ===== Tooltips (same as before, but slimmer) =====
+// ===== Tooltips =====
 const initTooltips = () => {
   const tips = [
-    ['#applyCfgBtn', 'Update the page URL with current config and re-initialize Capture. Does NOT submit a lead.'],
+    ['#step1NextBtn', 'Step 1: Parse site-config (mock) and show Step 2'],
+    ['#applyCfgBtn', 'Apply config & re-init Capture (optional utility)'],
     ['#resetCfgBtn', 'Reload the page with default config (clears the form).'],
-    ['#cfg-scid', 'SCID (campaign/site ID) loaded from the selected GMAID.'],
+    ['#cfg-scid', 'SCID (campaign/site ID).'],
     ['#cfg-siteid', 'Site identifier (rl_siteid) recognized by Capture.'],
     ['#cfg-gmaid', 'GMAID mapping used for routing (pick a test account).'],
     ['#cfg-env', 'Target backend environment: qa, stage, or prod.'],
@@ -573,18 +461,411 @@ const initTooltips = () => {
   });
 };
 
-// ===== Wire everything up =====
+// ========================================================================
+// STEP 1 + STEP 2 FLOW (mock site-config parsing)
+// ========================================================================
+
+// ---- Mock site-config (trimmed example) ----
+const MOCK_SITE_CONFIG = {
+  id: "61a53572-cd0e-4cc5-9451-66f19243563c",
+  global_master_advertiser_id: "USA_172216",
+  locale: "en-US",
+  config: JSON.stringify({ platform: "USA" }),
+  campaign_data: JSON.stringify({
+    "USA_4972998": {
+      marketing_policy: "true",
+      master_campaign_id: "4392582",
+      referrer_type: "PAID",
+      scids: ["4584989","4584990"]
+    },
+    "USA_4914303": {
+      marketing_policy: "true",
+      master_campaign_id: "4963362",
+      referrer_type: "PAID",
+      scids: []
+    }
+  }),
+  replacements: JSON.stringify({
+    "USA_4972998": {
+      email: [
+        { original: "dana@dzandassociates.com", replace: "formmail" }
+      ],
+      phone: [
+        { label: "YA2hCKfFkpAZEM6f5p8B", original: "4437701111", replace: "4433058053" }
+      ],
+      script: null,
+      strings: null
+    },
+    "USA_4914303": {
+      email: [
+        { original: "dana@dzandassociates.com", replace: "formmail" }
+      ],
+      phone: [
+        { original: "4437701111", replace: "4437701111" }
+      ],
+      script: null,
+      strings: null
+    }
+  }),
+  cvts: JSON.stringify({
+    "https://devereinsulationhomeperformance.com": {
+      "/thank-you/": [
+        {
+          campaign_id: "USA_4972998",
+          cvtName: "*Get A Quote Submitted",
+          cvtType: "2",
+          cvtValue: "2",
+          cvtid: "25148955",
+          masterCampaignId: "USA_4392582",
+          value: "high"
+        }
+      ]
+    }
+  })
+};
+
+// Derive interesting bits from the mock site-config
+const deriveScidOptionsFromMock = siteConfig => {
+  let parsedConfig = {};
+  let campaignData = {};
+  let replacements = {};
+  let cvts = {};
+
+  try { parsedConfig = JSON.parse(siteConfig.config || '{}'); } catch {}
+  try { campaignData = JSON.parse(siteConfig.campaign_data || '{}'); } catch {}
+  try { replacements = JSON.parse(siteConfig.replacements || '{}'); } catch {}
+  try { cvts = JSON.parse(siteConfig.cvts || '{}'); } catch {}
+
+  const campaignsWithScids = Object.entries(campaignData)
+    .filter(([, c]) => Array.isArray(c.scids) && c.scids.length > 0)
+    .map(([campaignId, c]) => ({
+      campaignId,
+      ...c
+    }));
+
+  const scidOptions = campaignsWithScids.map(camp => {
+    const rep = replacements[camp.campaignId] || {};
+    const phones = Array.isArray(rep.phone) ? rep.phone.slice() : [];
+    const emails = Array.isArray(rep.email) ? rep.email.slice() : [];
+    const strings = Array.isArray(rep.strings) ? rep.strings.slice() : [];
+
+    return {
+      campaignId: camp.campaignId,
+      referrerType: camp.referrer_type,
+      masterCampaignId: camp.master_campaign_id,
+      scids: camp.scids || [],
+      hasPhone: phones.length > 0,
+      hasEmail: emails.length > 0,
+      hasStrings: strings.length > 0,
+      phones,
+      emails,
+      strings
+    };
+  });
+
+  return {
+    parsedConfig,
+    campaignData,
+    campaignsWithScids,
+    scidOptions,
+    cvts
+  };
+};
+
+// Render SCID options into Step 2 card
+const renderStep2Card = scidOptions => {
+  const step2   = $('#step2Card');
+  const body    = $('#step2Body');
+  const nextBtn = $('#step2NextBtn');
+
+  if (!step2 || !body || !nextBtn) return;
+
+  // Flatten campaigns → individual SCID rows
+  const rows = [];
+  scidOptions.forEach(opt => {
+    (opt.scids || []).forEach(scid => {
+      rows.push({
+        scid,
+        campaignId: opt.campaignId,
+        referrerType: opt.referrerType,
+        masterCampaignId: opt.masterCampaignId,
+        hasPhone: opt.hasPhone,
+        hasEmail: opt.hasEmail,
+        hasStrings: opt.hasStrings,
+        phones: opt.phones,
+        emails: opt.emails,
+        strings: opt.strings
+      });
+    });
+  });
+
+  window.__step2ScidRows = rows;
+
+  if (!rows.length) {
+    body.innerHTML = `<p class="hint">No SCIDs with replacement data were found in this config.</p>`;
+    nextBtn.disabled = true;
+    step2.style.display = 'block';
+    return;
+  }
+
+  body.innerHTML = `
+    <p class="hint">
+      Select which campaign/SCID combo you want to use when we eventually create a visit &amp; lead.
+      (For now this just logs your choice to the Network Console.)
+    </p>
+    <div id="step2ScidList" class="step2-list" role="radiogroup" aria-label="SCID choices"></div>
+  `;
+
+  const list = $('#step2ScidList');
+
+  rows.forEach((row, idx) => {
+    const id = `scidOpt_${idx}`;
+
+    const phoneLabel = row.hasPhone
+      ? `📞 ${row.phones.length} phone mapping${row.phones.length === 1 ? '' : 's'}`
+      : '📞 no phone mapping';
+
+    const emailLabel = row.hasEmail
+      ? `✉️ ${row.emails.length} email mapping${row.emails.length === 1 ? '' : 's'}`
+      : '✉️ no email mapping';
+
+    const stringLabel = row.hasStrings
+      ? `🔤 ${row.strings.length} string replacement${row.strings.length === 1 ? '' : 's'}`
+      : '🔤 no string replacements';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'scid-choice';
+
+    wrapper.innerHTML = `
+      <label class="scid-choice-label" for="${id}">
+        <input
+          type="radio"
+          name="step2Scid"
+          value="${row.scid}"
+          id="${id}"
+          ${idx === 0 ? 'checked' : ''}
+          class="scid-choice-radio"
+        >
+        <div class="scid-choice-text">
+          <div class="scid-choice-title">
+            SCID ${row.scid}
+          </div>
+          <div class="scid-choice-meta">
+            ${row.referrerType || '—'} · campaign ${row.campaignId} · master ${row.masterCampaignId}
+          </div>
+          <div class="scid-choice-badges">
+            <span class="scid-choice-badge">${phoneLabel}</span>
+            <span class="scid-choice-badge">${emailLabel}</span>
+            <span class="scid-choice-badge">${stringLabel}</span>
+          </div>
+        </div>
+      </label>
+    `;
+
+    list.appendChild(wrapper);
+  });
+
+  nextBtn.disabled = false;
+  step2.style.display = 'block';
+};
+
+// Step 1 "Next": apply config, parse mock, log, then show Step 2
+const handleStep1Next = () => {
+  const cfg = getCfg();
+  rememberPresets();
+  applyCfgToURL(cfg);
+
+  (window.__dbglog || console.log)('Step1: current UI config', cfg);
+
+  const {
+    parsedConfig,
+    campaignData,
+    campaignsWithScids,
+    scidOptions,
+    cvts
+  } = deriveScidOptionsFromMock(MOCK_SITE_CONFIG);
+
+  window.__mockSiteConfig         = MOCK_SITE_CONFIG;
+  window.__mockCampaignData       = campaignData;
+  window.__mockCampaignsWithScids = campaignsWithScids;
+  window.__mockScidOptions        = scidOptions;
+  window.__mockCvts               = cvts;
+
+  (window.__dbglog || console.log)('Step1: parsed config', parsedConfig);
+  (window.__dbglog || console.log)('Step1: raw campaign_data', campaignData);
+  (window.__dbglog || console.log)('Step1: campaigns with SCIDs only', campaignsWithScids);
+  (window.__dbglog || console.log)('Step1: derived SCID options', scidOptions);
+  (window.__dbglog || console.log)('Step1: parsed cvts', cvts);
+
+  renderStep2Card(scidOptions);
+  setCaptureStatus('Step 1 complete: mock config parsed', 'ok');
+
+  // Scroll Step 2 into view
+  $('#step2Card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+// Step 2 "Back"
+const handleStep2Back = () => {
+  const step2 = $('#step2Card');
+  if (step2) {
+    step2.style.display = 'none';
+  }
+  $('#configCard')?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// Step 2 "Next": log selected SCID row
+const handleStep2Next = () => {
+  const selected = document.querySelector('input[name="step2Scid"]:checked');
+  if (!selected) {
+    alert('Please select an SCID option.');
+    return;
+  }
+
+  const scidValue = selected.value;
+  const rows = window.__step2ScidRows || [];
+  const row = rows.find(r => String(r.scid) === String(scidValue));
+
+  (window.__dbglog || console.log)(
+    'Step2: selected SCID row',
+    row || { scid: scidValue, note: 'not found in rows' }
+  );
+
+  alert(
+    'Step 2 selection captured.\n\n' +
+    'Check the Network Console for the "Step2: selected SCID row" entry.\n' +
+    'We can wire this into visit/event APIs next.'
+  );
+};
+
+// ========================================================================
+// ORIGINAL GMAID → SCID LOOKUP (kept, but not used right now)
+// ========================================================================
+
+/*
+let lastSites = []; // cache sites for current GMAID
+
+const apiBaseForEnv = env => {
+  const e = (env || 'stage').toLowerCase();
+
+  if (e === 'qa' || e === 'stage') {
+    return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
+  }
+
+  if (e === 'prod') {
+    return 'https://api.gcion.com/apgb2b-reachcodeandproxy';
+  }
+
+  return 'https://api-stage.gcion.com/apgb2b-reachcodeandproxy';
+};
+
+const lookupGmaidAndPopulateScids = async () => {
+  const { gmaid, env, apiKey } = getCfg();
+  const scidSelect = $('#cfg-scid');
+
+  if (!gmaid) {
+    scidSelect.innerHTML = '<option value="">– enter GMAID first –</option>';
+    lastSites = [];
+    return;
+  }
+
+  if (!apiKey) {
+    alert('Please enter an API key before looking up GMAID.');
+    return;
+  }
+
+  const base = apiBaseForEnv(env);
+  const url = `${base}/sites?global_master_advertiser_id=${encodeURIComponent(gmaid)}`;
+
+  setCaptureStatus('Looking up sites for GMAID…', 'warn');
+
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'x-api-key': apiKey
+      }
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      console.error('GMAID lookup failed', res.status, text);
+      alert(`GMAID lookup failed with status ${res.status}. See console for details.`);
+      setCaptureStatus('GMAID lookup failed', 'err');
+      return;
+    }
+
+    const data = await res.json();
+    lastSites = Array.isArray(data) ? data : [];
+
+    scidSelect.innerHTML = '';
+
+    if (!lastSites.length) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No sites found for this GMAID';
+      scidSelect.appendChild(opt);
+      setCaptureStatus('No sites found for this GMAID', 'warn');
+      return;
+    }
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '– select SCID –';
+    scidSelect.appendChild(placeholder);
+
+    lastSites.forEach(site => {
+      const opt = document.createElement('option');
+      opt.value = site.id;
+      opt.textContent = `${site.id} — ${site.url || 'no URL'}`;
+      scidSelect.appendChild(opt);
+    });
+
+    setCaptureStatus(`Loaded ${lastSites.length} site(s) for GMAID`, 'ok');
+
+  } catch (err) {
+    console.error('GMAID lookup error', err);
+    alert('GMAID lookup failed — check console for details.');
+    setCaptureStatus('GMAID lookup error', 'err');
+  }
+};
+
+const wireScidChangeToSiteid = () => {
+  const scidSelect = $('#cfg-scid');
+  if (!scidSelect) return;
+
+  scidSelect.addEventListener('change', () => {
+    const scid = scidSelect.value;
+    const site = lastSites.find(s => String(s.id) === String(scid));
+    if (site && site.capture_code_uuid && $('#cfg-siteid')) {
+      $('#cfg-siteid').value = site.capture_code_uuid;
+    }
+    applyCfgToURL(getCfg());
+  });
+};
+*/
+
+// ========================================================================
+// INIT
+// ========================================================================
 const init = () => {
   hydrateFormFromQS();
   wireMirrors();
   wireLeadTypeToggles();
   initCombos();
-  wireScidChangeToSiteid();
   initTooltips();
 
   $('#leadForm')?.addEventListener('submit', submitLead);
   $('#fillDemo')?.addEventListener('click', fillDemo);
-  $('#applyCfgBtn')?.addEventListener('click', reinitCapture);
+
+  // Step 1: dedicated Next button
+  $('#step1NextBtn')?.addEventListener('click', handleStep1Next);
+
+  // Optional: keep Apply as "re-init Capture with current config"
+  $('#applyCfgBtn')?.addEventListener('click', () => {
+    rememberPresets();
+    reinitCapture();
+  });
 
   $('#resetCfgBtn')?.addEventListener('click', () => {
     URL_CFG_KEYS.forEach(k => qs.set(k, DEFAULTS[k]));
@@ -595,18 +876,11 @@ const init = () => {
     applyCfgToURL(getCfg());
   });
 
-  // Trigger GMAID lookup on blur or when env changes
-  $('#cfg-gmaid')?.addEventListener('blur', lookupGmaidAndPopulateScids);
-  $('#cfg-env')?.addEventListener('change', () => {
-    applyCfgToURL(getCfg());
-    lookupGmaidAndPopulateScids();
-  });
+  // Step 2 buttons
+  $('#step2BackBtn')?.addEventListener('click', handleStep2Back);
+  $('#step2NextBtn')?.addEventListener('click', handleStep2Next);
 
-  // Initial Capture init, and optionally auto-lookup if GMAID is present
   reinitCapture();
-  if ($('#cfg-gmaid')?.value) {
-    lookupGmaidAndPopulateScids();
-  }
 
   // Extra mirrors
   $('#email')?.addEventListener('input', () => $('#xhr_form_email').value = $('#email').value);

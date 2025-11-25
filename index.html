@@ -15,6 +15,19 @@
       <h1>LIPS Lead Testing Site</h1>
       <span id="captureStatus" class="status warn">Capture SDK not initialized</span>
     </div>
+
+    <!-- Step 1 header -->
+    <div class="step-header">
+      <div class="step-tag">Step 1</div>
+      <div>
+        <div class="step-title">Configure account & environment</div>
+        <div class="step-desc">
+          Enter/select a GMAID, API key, and environment, then click <strong>Next</strong>.
+          For now we use a mock site config response and log the parsed data.
+        </div>
+      </div>
+    </div>
+
     <div class="grid" style="margin-top:10px;">
       <!-- GMAID (first stop) -->
       <div class="col-4">
@@ -65,8 +78,13 @@
         </select>
       </div>
 
+      <!-- Step 1 Next button -->
+      <div class="col-2" style="display:flex; align-items:flex-end; gap:8px; justify-content:flex-end;">
+        <button class="btn primary" id="step1NextBtn" type="button">Next: Load Site Config (mock)</button>
+      </div>
+
       <!-- Buttons -->
-      <div class="col-2" style="display:flex; align-items:flex-end; gap:8px;">
+      <div class="col-12" style="display:flex; align-items:flex-end; gap:8px; justify-content:flex-end; margin-top:8px;">
         <button class="btn" id="applyCfgBtn" title="Update URL & re-init capture">Apply</button>
         <button class="btn ghost" id="resetCfgBtn" title="Reset to defaults">Reset</button>
       </div>
@@ -90,6 +108,25 @@
       <div class="hint">Config persists in the page URL so you can share the link (API key stays local-only).</div>
     </div>
   </div>
+  <!-- STEP 2: Campaign / SCID selection -->
+  <div class="card" id="step2Card" style="display:none;">
+    <h2>Step 2 — Choose campaign & SCID</h2>
+    <p class="hint">
+      After parsing the site-config, choose which campaign/SCID you want to use for your test scenario.
+    </p>
+
+    <div id="step2Body">
+      <p class="hint">Run <strong>Step 1</strong> first to load SCIDs from the mock site-config.</p>
+    </div>
+
+    <div class="row" style="margin-top:16px;justify-content:flex-end;gap:8px;">
+      <button type="button" class="btn ghost" id="step2BackBtn">Back to Step 1</button>
+      <button type="button" class="btn primary" id="step2NextBtn" disabled>
+        Next: Visit & Event (later)
+      </button>
+    </div>
+  </div>
+
 
   <div style="height:16px;"></div>
 

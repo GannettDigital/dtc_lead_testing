@@ -145,3 +145,109 @@ textarea{min-height:90px;resize:vertical;}
 
 .badge-hidden  { opacity:0; pointer-events:none; transform:translateY(-2px); }
 .badge-show    { opacity:1; transform:translateY(0); }
+
+/* Don't make radios/checkboxes full-width */
+input[type="radio"],
+input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+}
+
+/* Step header styling */
+.step-header {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin: 12px 0 4px;
+}
+
+.step-tag {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #0f1a33;
+    border: 1px solid #26365f;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+.step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+}
+
+.step-desc {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* ===== Step 2 SCID list styling ===== */
+.step2-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px auto 0;
+    max-width: 640px;          /* keep the list narrower & centered */
+}
+
+/* Simple row: [radio] [text/badges] */
+.scid-choice {
+    display: flex;
+    align-items: flex-start;
+    border: 1px solid #1f2a44;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: #101929;
+}
+
+.scid-choice-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.scid-choice-radio {
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.scid-choice-text {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+
+.scid-choice-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.scid-choice-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.scid-choice-badges {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    justify-content: flex-start;
+}
+
+.scid-choice-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #26365f;
+    background: #0f1a33;
+}
