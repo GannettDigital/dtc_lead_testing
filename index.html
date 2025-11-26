@@ -18,7 +18,7 @@
 
     <!-- Step 1 header -->
     <div class="step-header">
-      <div class="step-tag">Step 1</div>
+      <div class="step-tag step1">Step 1</div>
       <div>
         <div class="step-title">Configure account & environment</div>
         <div class="step-desc">
@@ -105,20 +105,23 @@
         <button class="btn" data-leadtype="call" aria-pressed="false">Call</button>
         <button class="btn" data-leadtype="chatbot" aria-pressed="false">Chatbot</button>
       </div>
-      <div class="hint">Config persists in the page URL so you can share the link (API key stays local-only).</div>
+      <div class="hint"></div>
     </div>
   </div>
   <!-- STEP 2: Campaign / SCID selection -->
   <div class="card" id="step2Card" style="display:none;">
-    <h2>Step 2 — Choose campaign & SCID</h2>
-    <p class="hint">
-      After parsing the site-config, choose which campaign/SCID you want to use for your test scenario.
-    </p>
-
+    <div class="step-header">
+      <div class="step-tag step2">Step 2</div>
+      <div>
+        <div class="step-title">Choose campaign & SCID</div>
+        <div class="step-desc">
+          After this, we will choose a lead type, which creates a visit record which is tied to the SCID & use that to create the lead
+        </div>
+      </div>
+    </div>
     <div id="step2Body">
       <p class="hint">Run <strong>Step 1</strong> first to load SCIDs from the mock site-config.</p>
     </div>
-
     <div class="row" style="margin-top:16px;justify-content:flex-end;gap:8px;">
       <button type="button" class="btn ghost" id="step2BackBtn">Back to Step 1</button>
       <button type="button" class="btn primary" id="step2NextBtn" disabled>
@@ -127,6 +130,28 @@
     </div>
   </div>
 
+  <!-- STEP 3: Signal (phone/email/string) selection -->
+  <div class="card" id="step3Card" style="display:none;">
+    <div class="step-header">
+      <div class="step-tag step3">Step 3</div>
+      <div>
+        <div class="step-title">Choose signal to send</div>
+        <div class="step-desc">
+          Pick which replacement (phone, email, or other) you want to use to create the lead.
+        </div>
+      </div>
+    </div>
+    <div id="step3Body">
+      <p class="hint">Run <strong>Step 2</strong> and select a campaign/SCID to see available signals.</p>
+    </div>
+
+    <div class="row" style="margin-top:16px;justify-content:flex-end;gap:8px;">
+      <button type="button" class="btn ghost" id="step3BackBtn">Back to Step 2</button>
+      <button type="button" class="btn primary" id="step3NextBtn" disabled>
+        Next: Visit &amp; Lead (later)
+      </button>
+    </div>
+  </div>
 
   <div style="height:16px;"></div>
 

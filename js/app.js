@@ -1,6 +1,5 @@
 /* eslint-disable no-alert */
 
-// ===== Small helpers =====
 const qs  = new URLSearchParams(location.search);
 const $   = sel => document.querySelector(sel);
 const $$  = sel => Array.from(document.querySelectorAll(sel));
@@ -15,7 +14,7 @@ const DEFAULTS = {
   env: "qa",
   leadtype: "web",
   dryrun: "1",
-  apiKey: ""  // local-only
+  apiKey: ""
 };
 
 // Lead type -> event_type mapping for LIPS
@@ -465,7 +464,7 @@ const initTooltips = () => {
 // STEP 1 + STEP 2 FLOW (mock site-config parsing)
 // ========================================================================
 
-// ---- Mock site-config (trimmed example) ----
+// ---- Mock site-config ----
 const MOCK_SITE_CONFIG = {
   id: "61a53572-cd0e-4cc5-9451-66f19243563c",
   global_master_advertiser_id: "USA_172216",
@@ -524,7 +523,7 @@ const MOCK_SITE_CONFIG = {
   })
 };
 
-// Derive interesting bits from the mock site-config
+// Derive segments from config objects
 const deriveScidOptionsFromMock = siteConfig => {
   let parsedConfig = {};
   let campaignData = {};
@@ -572,6 +571,163 @@ const deriveScidOptionsFromMock = siteConfig => {
   };
 };
 
+// Build list of candidate "signals" (phone/email/string) from a selected SCID row
+const buildSignalsFromRow = row => {
+  const signals = [];
+  let idx = 0;
+
+  // Phone signals
+  (row.phones || []).forEach(p => {
+    signals.push({
+      id: `phone_${idx++}`,
+      type: 'phone',
+      campaignId: row.campaignId,
+      scid: row.scid,
+      masterCampaignId: row.masterCampaignId,
+      referrerType: row.referrerType,
+      original: p.original,
+      replace: p.replace,
+      label: p.label || null
+    });
+  });
+
+  // Email signals
+  (row.emails || []).forEach(e => {
+    signals.push({
+      id: `email_${idx++}`,
+      type: 'email',
+      campaignId: row.campaignId,
+      scid: row.scid,
+      masterCampaignId: row.masterCampaignId,
+      referrerType: row.referrerType,
+      original: e.original,
+      replace: e.replace,
+      label: null
+    });
+  });
+
+  // String signals //TODO GSW figure out what strings/scripts are & where chatbot exists
+  (row.strings || []).forEach(s => {
+    signals.push({
+      id: `string_${idx++}`,
+      type: 'string',
+      campaignId: row.campaignId,
+      scid: row.scid,
+      masterCampaignId: row.masterCampaignId,
+      referrerType: row.referrerType,
+      original: s.original,
+      replace: s.replace,
+      label: null
+    });
+  });
+
+  return signals;
+};
+
+// Render Step 3 "Choose signal" UI from a selected SCID row
+const renderStep3Card = row => {
+  const body = $('#step3Body');
+  const nextBtn = $('#step3NextBtn');
+  if (!body || !nextBtn) return;
+
+  const signals = buildSignalsFromRow(row);
+  window.__step3Signals = signals;
+  window.__step3SelectedSignalId = signals[0]?.id || null;
+
+  if (!signals.length) {
+    body.innerHTML = `
+      <p class="hint">
+        No phone, email, or string replacements were found for
+        campaign <strong>${row.campaignId}</strong>, SCID <strong>${row.scid}</strong>.
+      </p>
+      <p class="hint">
+        You can go back to Step 2 and choose a different SCID, or proceed later
+        once more data is available.
+      </p>
+    `;
+    nextBtn.disabled = true;
+    return;
+  }
+
+  const listId = 'step3SignalList';
+
+  body.innerHTML = `
+    <p class="hint">
+      Campaign <strong>${row.campaignId}</strong>, SCID <strong>${row.scid}</strong><br />
+      Referrer: <strong>${row.referrerType || '—'}</strong> · Master campaign: <strong>${row.masterCampaignId || '—'}</strong>
+    </p>
+    <div id="${listId}" class="signal-list" role="radiogroup" aria-label="Signal choices"></div>
+  `;
+
+  const list = $(`#${listId}`);
+
+  signals.forEach((sig, idx) => {
+    const id = `signalOpt_${idx}`;
+    const typeLabel =
+      sig.type === 'phone' ? 'Phone lead'
+        : sig.type === 'email' ? 'Email lead'
+          : 'Other / string';
+
+    const typeIcon =
+      sig.type === 'phone' ? '📞'
+        : sig.type === 'email' ? '✉️'
+          : '🔤';
+
+    const metaParts = [];
+    metaParts.push(`${sig.type.toUpperCase()} replacement`);
+    if (sig.label) metaParts.push(`label: ${sig.label}`);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'signal-choice';
+
+    wrapper.innerHTML = `
+      <label class="signal-choice-label" for="${id}">
+        <input
+          type="radio"
+          name="step3Signal"
+          value="${sig.id}"
+          id="${id}"
+          ${idx === 0 ? 'checked' : ''}
+          class="signal-choice-radio"
+        >
+        <div class="signal-choice-text">
+          <div class="signal-choice-title">
+            ${typeIcon} ${typeLabel}
+          </div>
+          <div class="signal-choice-meta">
+            campaign ${sig.campaignId} · SCID ${sig.scid} · referrer ${sig.referrerType || '—'}
+          </div>
+
+          <div class="signal-type-pill">
+            <span>${typeIcon}</span>
+            <span>${metaParts.join(' · ')}</span>
+          </div>
+
+          <div class="signal-choice-tags">
+            <span class="signal-choice-tag">
+              <strong>actual</strong>&nbsp;${sig.original}
+            </span>
+            <span class="signal-choice-tag">
+              <strong>replace</strong>&nbsp;${sig.replace}
+            </span>
+          </div>
+        </div>
+      </label>
+    `;
+
+    list.appendChild(wrapper);
+  });
+
+  // Wire radios to update selected signal id
+  list.querySelectorAll('input[name="step3Signal"]').forEach(input => {
+    input.addEventListener('change', () => {
+      window.__step3SelectedSignalId = input.value;
+    });
+  });
+
+  nextBtn.disabled = false;
+};
+
 // Render SCID options into Step 2 card
 const renderStep2Card = scidOptions => {
   const step2   = $('#step2Card');
@@ -580,7 +736,7 @@ const renderStep2Card = scidOptions => {
 
   if (!step2 || !body || !nextBtn) return;
 
-  // Flatten campaigns → individual SCID rows
+  // Flatten campaigns into individual SCID rows
   const rows = [];
   scidOptions.forEach(opt => {
     (opt.scids || []).forEach(scid => {
@@ -610,11 +766,9 @@ const renderStep2Card = scidOptions => {
 
   body.innerHTML = `
     <p class="hint">
-      Select which campaign/SCID combo you want to use when we eventually create a visit &amp; lead.
-      (For now this just logs your choice to the Network Console.)
+      &nbsp;
     </p>
-    <div id="step2ScidList" class="step2-list" role="radiogroup" aria-label="SCID choices"></div>
-  `;
+    <div id="step2ScidList" class="step2-list" role="radiogroup" aria-label="SCID choices"></div>`;
 
   const list = $('#step2ScidList');
 
@@ -632,6 +786,85 @@ const renderStep2Card = scidOptions => {
     const stringLabel = row.hasStrings
       ? `🔤 ${row.strings.length} string replacement${row.strings.length === 1 ? '' : 's'}`
       : '🔤 no string replacements';
+
+    // Build replacement detail blocks
+    const phoneRows = (row.phones || []).map(p => {
+      const labelPart = p.label
+        ? `<span class="scid-repl-label">label</span><span class="scid-repl-value">${p.label}</span> `
+        : '';
+      return `
+        <div class="scid-repl-item">
+          <span class="scid-repl-label">actual</span>
+          <span class="scid-repl-value">${p.original}</span>
+          &nbsp;→&nbsp;
+          <span class="scid-repl-label">replace</span>
+          <span class="scid-repl-value">${p.replace}</span>
+          ${labelPart}
+        </div>
+      `;
+    }).join('');
+
+    const emailRows = (row.emails || []).map(e => `
+      <div class="scid-repl-item">
+        <span class="scid-repl-label">actual</span>
+        <span class="scid-repl-value">${e.original}</span>
+        &nbsp;→&nbsp;
+        <span class="scid-repl-label">replace</span>
+        <span class="scid-repl-value">${e.replace}</span>
+      </div>
+    `).join('');
+
+    const stringRows = (row.strings || []).map(s => `
+      <div class="scid-repl-item">
+        <span class="scid-repl-label">actual</span>
+        <span class="scid-repl-value">${s.original}</span>
+        &nbsp;→&nbsp;
+        <span class="scid-repl-label">replace</span>
+        <span class="scid-repl-value">${s.replace}</span>
+      </div>
+    `).join('');
+
+    const phoneBlock = row.hasPhone
+      ? `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">Phone replacements</div>
+          ${phoneRows}
+        </div>
+      `
+      : `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">Phone replacements</div>
+          <div class="scid-repl-empty">No phone replacements found for this campaign.</div>
+        </div>
+      `;
+
+    const emailBlock = row.hasEmail
+      ? `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">Email replacements</div>
+          ${emailRows}
+        </div>
+      `
+      : `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">Email replacements</div>
+          <div class="scid-repl-empty">No email replacements found for this campaign.</div>
+        </div>
+      `;
+
+    const stringBlock = row.hasStrings
+      ? `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">String replacements</div>
+          ${stringRows}
+        </div>
+      `
+      : `
+        <div class="scid-repl-group">
+          <div class="scid-replacements-title">String replacements</div>
+          <div class="scid-repl-empty">No string replacements found for this campaign.</div>
+        </div>
+      `;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'scid-choice';
@@ -660,9 +893,57 @@ const renderStep2Card = scidOptions => {
           </div>
         </div>
       </label>
+
+      <div class="scid-choice-footer">
+        <button type="button" class="scid-repl-toggle" data-repl-toggle>
+          <span data-repl-label>Show replacements</span>
+          <span aria-hidden="true">▾</span>
+        </button>
+      </div>
+
+      <div class="scid-replacements" data-repl-panel hidden>
+        <div class="scid-replacements-title">
+          Campaign: ${row.campaignId}<br />SCID: ${row.scid}
+        </div>
+        <div class="scid-repl-meta">
+          Referrer: ${row.referrerType || '—'}<br />Master campaign: ${row.masterCampaignId || '—'}
+        </div>
+        ${phoneBlock}
+        ${emailBlock}
+        ${stringBlock}
+      </div>
     `;
 
     list.appendChild(wrapper);
+
+    // Wire the toggle for this row
+    const toggleBtn = wrapper.querySelector('[data-repl-toggle]');
+    const labelSpan = wrapper.querySelector('[data-repl-label]');
+    const panel     = wrapper.querySelector('[data-repl-panel]');
+
+    if (toggleBtn && panel && labelSpan) {
+      toggleBtn.addEventListener('click', () => {
+        const isHidden = panel.hasAttribute('hidden');
+
+        // If opening, close other panels first
+        if (isHidden) {
+          document.querySelectorAll('.scid-replacements[data-repl-panel]').forEach(p => {
+            p.setAttribute('hidden', 'hidden');
+          });
+          document.querySelectorAll('.scid-repl-toggle [data-repl-label]').forEach(ls => {
+            ls.textContent = 'Show replacements';
+          });
+        }
+
+        if (isHidden) {
+          panel.removeAttribute('hidden');
+          labelSpan.textContent = 'Hide replacements';
+        } else {
+          panel.setAttribute('hidden', 'hidden');
+          labelSpan.textContent = 'Show replacements';
+        }
+      });
+    }
   });
 
   nextBtn.disabled = false;
@@ -713,7 +994,7 @@ const handleStep2Back = () => {
   $('#configCard')?.scrollIntoView({ behavior: 'smooth' });
 };
 
-// Step 2 "Next": log selected SCID row
+// Step 2 "Next": log selected SCID row and show Step 3
 const handleStep2Next = () => {
   const selected = document.querySelector('input[name="step2Scid"]:checked');
   if (!selected) {
@@ -730,11 +1011,63 @@ const handleStep2Next = () => {
     row || { scid: scidValue, note: 'not found in rows' }
   );
 
-  alert(
-    'Step 2 selection captured.\n\n' +
-    'Check the Network Console for the "Step2: selected SCID row" entry.\n' +
-    'We can wire this into visit/event APIs next.'
+  if (!row) {
+    alert('Could not find the selected SCID details. Please try again.');
+    return;
+  }
+
+  // Persist the chosen SCID row for later steps
+  window.__step2SelectedRow = row;
+
+  // Build & show Step 3 UI
+  renderStep3Card(row);
+
+  // Move user to Step 3 in the flow
+  const step2 = $('#step2Card');
+  const step3 = $('#step3Card');
+  if (step2 && step3) {
+    step2.style.display = 'none';
+    step3.style.display = 'block';
+    step3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  setCaptureStatus('Step 2 complete: SCID selected', 'ok');
+};
+
+// Step 3 "Back": return to Step 2, keep selection
+const handleStep3Back = () => {
+  const step2 = $('#step2Card');
+  const step3 = $('#step3Card');
+  if (step2 && step3) {
+    step3.style.display = 'none';
+    step2.style.display = 'block';
+    step2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+// Step 3 "Next": for now, just log the chosen signal (placeholder for visit/event)
+const handleStep3Next = () => {
+  const signals = window.__step3Signals || [];
+  const selectedId = window.__step3SelectedSignalId;
+  const signal = signals.find(s => s.id === selectedId);
+
+  if (!signal) {
+    alert('Please choose which signal you want to send.');
+    return;
+  }
+
+  (window.__dbglog || console.log)(
+    'Step3: selected signal',
+    signal
   );
+
+  alert(
+    'Step 3 selection captured.\n\n' +
+    'Check the Network Console for the "Step3: selected signal" entry.\n' +
+    'Next step is wiring this into visit + event APIs.'
+  );
+
+  setCaptureStatus('Step 3 complete: signal selected', 'ok');
 };
 
 // ========================================================================
@@ -861,7 +1194,7 @@ const init = () => {
   // Step 1: dedicated Next button
   $('#step1NextBtn')?.addEventListener('click', handleStep1Next);
 
-  // Optional: keep Apply as "re-init Capture with current config"
+  // Keep Apply as "re-init Capture with current config" // TODO GSW  obsolete??
   $('#applyCfgBtn')?.addEventListener('click', () => {
     rememberPresets();
     reinitCapture();
@@ -880,9 +1213,12 @@ const init = () => {
   $('#step2BackBtn')?.addEventListener('click', handleStep2Back);
   $('#step2NextBtn')?.addEventListener('click', handleStep2Next);
 
+  // Step 3 buttons
+  $('#step3BackBtn')?.addEventListener('click', handleStep3Back);
+  $('#step3NextBtn')?.addEventListener('click', handleStep3Next);
+
   reinitCapture();
 
-  // Extra mirrors
   $('#email')?.addEventListener('input', () => $('#xhr_form_email').value = $('#email').value);
   $('#phone')?.addEventListener('input', () => $('#xhr_form_phone').value = $('#phone').value);
 };
