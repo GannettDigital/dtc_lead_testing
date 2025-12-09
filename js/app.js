@@ -1,7 +1,4 @@
-// js/app.js
-
 /* ========= PRESETS ========= */
-
 const PRESETS = {
   // ============================
   // GMAID 1 – USA_172216 (DeVere)
@@ -121,73 +118,31 @@ function getCfg () {
 
 /**
  * Keep env + preset + dryrun in the URL so you can share links.
-<<<<<<< Updated upstream
-=======
  * Source of truth is cfg (which came from UI/currentPresetKey).
->>>>>>> Stashed changes
  */
 function applyCfgToURL (cfg) {
   const params = new URLSearchParams(location.search);
 
+  // Core
   params.set('env', (cfg.env || 'qa').toLowerCase());
   params.set('preset', cfg.presetKey || 'deverePaid');
   params.set('dryrun', cfg.dryrun || '1');
 
-<<<<<<< Updated upstream
-  // Keep the “old” Capture-style params in sync with the preset
-  // so if capture-bootstrap.js is still around, it sees correct IDs.
-=======
   // Keep Capture-style params in sync, but *do not* read from them
->>>>>>> Stashed changes
   params.set('scid', cfg.scid);
   params.set('siteid', cfg.siteid);
   params.set('gmaid', cfg.gmaid);
   params.set('e', (cfg.env || 'qa').toLowerCase());
 
-<<<<<<< Updated upstream
   // Kill legacy stuff we no longer use
-=======
->>>>>>> Stashed changes
   params.delete('leadtype');
 
   history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
 }
 
 /**
-<<<<<<< Updated upstream
- * Hydrate UI from query string: env, preset, dryrun.
- */
-function hydrateFormFromQS () {
-  const cfg = {
-    env: qs.get('env') || 'qa',
-    presetKey: qs.get('preset') || 'deverePaid',
-    dryrun: qs.get('dryrun') || '1'
-  };
-
-  // Env select
-  if ($('#cfg-env')) {
-    $('#cfg-env').value = cfg.env;
-  }
-
-  // Dry-run toggle
-  if ($('#dryRun')) {
-    $('#dryRun').checked = cfg.dryrun === '1';
-  }
-
-  // Preset pills
-  const targetKey = PRESETS[cfg.presetKey] ? cfg.presetKey : 'deverePaid';
-  applyPresetToUI(targetKey);
-
-  const fullCfg = getCfg();
-  applyCfgToURL(fullCfg);
-}
-
-/**
  * When a preset is selected, populate the readonly config fields
  * (gmaid, scid, siteid) so you can see which IDs are in use.
-=======
- * When a preset is selected, update state + UI
->>>>>>> Stashed changes
  */
 function renderPresetDetail (presetKey) {
   const preset = PRESETS[presetKey] || PRESETS.deverePaid;
@@ -245,8 +200,8 @@ function applyPresetToUI (presetKey) {
 }
 
 /**
- * Hydrate UI from query string: we ONLY use it to choose the *initial* preset/env/dryrun.
- * After that, UI + currentPresetKey are the source of truth.
+ * Hydrate UI from query string: we ONLY use it to choose the *initial*
+ * preset/env/dryrun. After that, UI + currentPresetKey are the source of truth.
  */
 function hydrateFormFromQS () {
   const initialEnv   = qs.get('env')    || 'qa';
@@ -362,27 +317,22 @@ async function createVisit (cfg, visitPayload) {
 }
 
 /* ========= FORM-POST PAYLOAD / API ========= */
-<<<<<<< Updated upstream
 
 function buildFormPostBody (lead) {
-  // Mirrors your older /api/v1/posts mapping
-=======
-function buildFormPostBody(lead) {
->>>>>>> Stashed changes
   return new URLSearchParams({
     // Basic identity → contact_info
-    firstname: lead.first_name,  //  contact_info.first_name
-    lastname:  lead.last_name,   //  contact_info.last_name
-    email:     lead.email,       //  contact_info.email
-    phone:     lead.phone,       //  contact_info.phone_work
+    firstname: lead.first_name,      // contact_info.first_name
+    lastname:  lead.last_name,       // contact_info.last_name
+    email:     lead.email,           // contact_info.email
+    phone:     lead.phone,           // contact_info.phone_work
 
     // Address / contact_info
-    address:   lead.address1,    //  contact_info.address1
-    suite:     lead.address2,    //  contact_info.address2
-    city:      lead.city,        //  contact_info.city
-    state:     lead.state,       //  contact_info.state
-    postal:    lead.postal_code, //  contact_info.zip
-    country:   'USA',            //  contact_info.country (optional but nice)
+    address:   lead.address1,        // contact_info.address1
+    suite:     lead.address2,        // contact_info.address2
+    city:      lead.city,            // contact_info.city
+    state:     lead.state,           // contact_info.state
+    postal:    lead.postal_code,     // contact_info.zip
+    country:   'USA',                // contact_info.country
     message:   lead.notes,
 
     // Hidden/technical fields
@@ -428,7 +378,7 @@ function buildFormPostPayload (cfg, lead, visitMeta) {
     hidden_fields: 'campaign_id,campaign_name,submit_button',
     rl_eid: 'trackPost-' + Math.random().toString(36).slice(2, 10),
     version: captureVersion,
-    event_type_hint: 'form',
+    event_type_hint: 'form'
   };
 }
 
@@ -521,15 +471,15 @@ async function submitLead (evt) {
 
 function fillDemo () {
   $('#first_name').value = 'LocaliQ';
-  $('#last_name').value = 'Tester';
-  $('#email').value = 'localiq.tester@example.com';
-  $('#phone').value = '555-888-1234';
-  $('#address1').value = '123 Demo Street';
-  $('#address2').value = 'Apt 4B';
-  $('#city').value = 'Boston';
-  $('#state').value = 'MA';
+  $('#last_name').value  = 'Tester';
+  $('#email').value      = 'localiq.tester@example.com';
+  $('#phone').value      = '555-888-1234';
+  $('#address1').value   = '123 Demo Street';
+  $('#address2').value   = 'Apt 4B';
+  $('#city').value       = 'Boston';
+  $('#state').value      = 'MA';
   $('#postal_code').value = '02118';
-  $('#notes').value = 'QA form post lead for LIPS testing.';
+  $('#notes').value      = 'QA form post lead for LIPS testing.';
   $('#xhr_form_email').value = $('#email').value;
   $('#xhr_form_phone').value = $('#phone').value;
 }
@@ -564,12 +514,15 @@ function init () {
   wireMirrors();
   wirePresetButtons();
 
+  // Keep URL in sync on env/dryrun change
   $('#cfg-env')?.addEventListener('change', () => applyCfgToURL(getCfg()));
   $('#dryRun')?.addEventListener('change', () => applyCfgToURL(getCfg()));
 
+  // Lead form + demo
   $('#leadForm')?.addEventListener('submit', submitLead);
   $('#fillDemo')?.addEventListener('click', fillDemo);
 
+  // Mirrors on initial load
   $('#email')?.addEventListener('input', () => $('#xhr_form_email').value = $('#email').value);
   $('#phone')?.addEventListener('input', () => $('#xhr_form_phone').value = $('#phone').value);
 }
