@@ -1,3 +1,4 @@
+/* ========= PRESETS ========= */
 const PRESETS = {
   // ============================
   // GMAID 1 – USA_172216 (DeVere)
@@ -69,13 +70,8 @@ const $   = sel => document.querySelector(sel);
 const $$  = sel => Array.from(document.querySelectorAll(sel));
 const dbglog = (...args) => (window.__dbglog || console.log)(...args);
 
-/**
- * Get user selection
- */
-function getSelectedPresetKey () {
-  const btn = document.querySelector('.preset-btn[aria-pressed="true"]');
-  return btn && btn.dataset.preset;
-}
+// Single source of truth for the selected preset
+let currentPresetKey = 'deverePaid';
 
 /**
  * Simple tc generator (unix timestamp + 5 random digits)
@@ -89,24 +85,27 @@ function generateTc () {
 /**
  * Read config from UI (env, dryrun, selected preset) and
  * merge with the preset’s static values.
+ *
+ * IMPORTANT: preset selection comes from currentPresetKey, not the URL.
  */
 function getCfg () {
-  const envSel      = $('#cfg-env');
-  const dryRunEl    = $('#dryRun');
-  const presetRadio = document.querySelector('input[name="preset"]:checked');
+  const envSel   = $('#cfg-env');
+  const dryRunEl = $('#dryRun');
 
-  const env = (envSel && envSel.value) || qs.get('env') || 'qa';
+  const env = (envSel && envSel.value) || 'qa';
 
-  // Only fall back to the query string if there is no checkbox in the DOM.
   let dryrun;
   if (dryRunEl) {
     dryrun = dryRunEl.checked ? '1' : '0';
   } else {
-    dryrun = qs.get('dryrun') || '1';
+    // fallback if checkbox is missing
+    dryrun = '1';
   }
 
-  const presetKeyFromUI = presetRadio && presetRadio.value;
-  const presetKey = presetKeyFromUI || qs.get('preset') || 'deverePaid';
+  const presetKey = (currentPresetKey && PRESETS[currentPresetKey])
+    ? currentPresetKey
+    : 'deverePaid';
+
   const preset = PRESETS[presetKey] || PRESETS.deverePaid;
 
   return {
@@ -119,56 +118,26 @@ function getCfg () {
 
 /**
  * Keep env + preset + dryrun in the URL so you can share links.
+ * Source of truth is cfg (which came from UI/currentPresetKey).
  */
 function applyCfgToURL (cfg) {
   const params = new URLSearchParams(location.search);
 
-  // Core for this tool
+  // Core
   params.set('env', (cfg.env || 'qa').toLowerCase());
   params.set('preset', cfg.presetKey || 'deverePaid');
   params.set('dryrun', cfg.dryrun || '1');
 
-  // Keep the “old” Capture-style params in sync with the preset
-  // so if capture-bootstrap.js is still around, it sees correct IDs.
+  // Keep Capture-style params in sync, but *do not* read from them
   params.set('scid', cfg.scid);
   params.set('siteid', cfg.siteid);
   params.set('gmaid', cfg.gmaid);
-
-  // For capture-bootstrap, which reads ?e=qa/stage/prod
   params.set('e', (cfg.env || 'qa').toLowerCase());
 
   // Kill legacy stuff we no longer use
   params.delete('leadtype');
 
   history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
-}
-
-/**
- * Hydrate UI from query string: env, preset, dryrun.
- */
-function hydrateFormFromQS () {
-  const cfg = {
-    env: qs.get('env') || 'qa',
-    presetKey: qs.get('preset') || 'deverePaid',
-    dryrun: qs.get('dryrun') || '1'
-  };
-
-  // Env select
-  if ($('#cfg-env')) {
-    $('#cfg-env').value = cfg.env;
-  }
-
-  // Dry-run toggle
-  if ($('#dryRun')) {
-    $('#dryRun').checked = cfg.dryrun === '1';
-  }
-
-  // Preset pills
-  const targetKey = PRESETS[cfg.presetKey] ? cfg.presetKey : 'deverePaid';
-  applyPresetToUI(targetKey);
-
-  const fullCfg = getCfg();
-  applyCfgToURL(fullCfg);
 }
 
 /**
@@ -217,6 +186,9 @@ function renderPresetDetail (presetKey) {
 function applyPresetToUI (presetKey) {
   const key = PRESETS[presetKey] ? presetKey : 'deverePaid';
 
+  // Update global preset state
+  currentPresetKey = key;
+
   // Update pill states
   $$('.preset-btn').forEach(btn => {
     const isActive = btn.dataset.preset === key;
@@ -225,6 +197,31 @@ function applyPresetToUI (presetKey) {
 
   // Update detail panel
   renderPresetDetail(key);
+}
+
+/**
+ * Hydrate UI from query string: we ONLY use it to choose the *initial*
+ * preset/env/dryrun. After that, UI + currentPresetKey are the source of truth.
+ */
+function hydrateFormFromQS () {
+  const initialEnv   = qs.get('env')    || 'qa';
+  const initialDry   = qs.get('dryrun') || '1';
+  const initialKeyQS = qs.get('preset') || 'deverePaid';
+
+  const initialPresetKey = PRESETS[initialKeyQS] ? initialKeyQS : 'deverePaid';
+
+  currentPresetKey = initialPresetKey;
+  applyPresetToUI(initialPresetKey);
+
+  if ($('#cfg-env')) {
+    $('#cfg-env').value = initialEnv;
+  }
+  if ($('#dryRun')) {
+    $('#dryRun').checked = initialDry === '1';
+  }
+
+  const fullCfg = getCfg();
+  applyCfgToURL(fullCfg);
 }
 
 /* ========= LEAD PAYLOAD BUILDING ========= */
@@ -298,7 +295,6 @@ function buildVisitPayload (cfg) {
 }
 
 async function createVisit (cfg, visitPayload) {
-  // For now we only support QA; prod is hard-blocked anyway.
   const host = `${cfg.siteid}.qa15.rlets.com`;
   const url  = `https://${host}/api/v1/visits`;
 
@@ -317,36 +313,34 @@ async function createVisit (cfg, visitPayload) {
     throw new Error(`Visit create failed: HTTP ${res.status}`);
   }
 
-  // backend often returns empty or minimal; we trust our local visit_id/visitor_id
   return { ok: true };
 }
 
 /* ========= FORM-POST PAYLOAD / API ========= */
 
 function buildFormPostBody (lead) {
-  // Mirrors your older /api/v1/posts mapping
   return new URLSearchParams({
-    company___required: '',
-    address1___required: lead.address1,
-    email___required: lead.email,
-    first_name___required: lead.first_name,
-    title___required: '',
-    last_name___required: lead.last_name,
-    phone___required: lead.phone,
-    phone_work___required: '',
-    phone_mobile___required: '',
-    phone_home___required: '',
-    address_2: lead.address2,
-    city___required: lead.city,
-    state: lead.state,
-    country: '',
-    postal___required: lead.postal_code,
-    message: lead.notes,
-    campaign_id: '',
+    // Basic identity → contact_info
+    firstname: lead.first_name,      // contact_info.first_name
+    lastname:  lead.last_name,       // contact_info.last_name
+    email:     lead.email,           // contact_info.email
+    phone:     lead.phone,           // contact_info.phone_work
+
+    // Address / contact_info
+    address:   lead.address1,        // contact_info.address1
+    suite:     lead.address2,        // contact_info.address2
+    city:      lead.city,            // contact_info.city
+    state:     lead.state,           // contact_info.state
+    postal:    lead.postal_code,     // contact_info.zip
+    country:   'USA',                // contact_info.country
+    message:   lead.notes,
+
+    // Hidden/technical fields
+    campaign_id:   '',
     campaign_name: '',
     submit_button: 'SUBMIT',
-    event_type: 'form',
-    lead_type: 'form'
+    event_type:    'form',
+    lead_type:     'form'
   }).toString();
 }
 
@@ -415,10 +409,9 @@ async function createFormLead (cfg, formPayload) {
 async function submitLead (evt) {
   evt.preventDefault();
 
-  const cfg = getCfg();
+  const cfg  = getCfg();
   const lead = buildLeadPayload();
 
-  // Hard stop for prod in this interim tool
   if ((cfg.env || '').toLowerCase() === 'prod') {
     setStatusBadge('err', 'Blocked', 'Prod submissions are disabled on this test page');
     alert('Submission blocked.\n\nThis page only allows QA. Set environment to "qa".');
@@ -430,14 +423,11 @@ async function submitLead (evt) {
     return;
   }
 
-  // Build visit payload (even in dry-run so we can log it)
   const { visit_id, visitor_id, tc, payload: visitPayload } = buildVisitPayload(cfg);
   const visitMeta = { visit_id, visitor_id, tc };
 
-  // Build form-post payload too (so dry-run sees everything)
   const formPayload = buildFormPostPayload(cfg, lead, visitMeta);
 
-  // DRY RUN: no network, just log both payloads
   if (cfg.dryrun === '1') {
     setStatusBadge('ok', 'Dry-run only', 'Visit + Form payloads logged; no network calls');
     dbglog('[dry-run] visit payload', visitPayload);
@@ -449,7 +439,6 @@ async function submitLead (evt) {
   try {
     setStatusBadge('pending', 'Creating visit…', 'Calling /api/v1/visits');
 
-    // 1) Create Visit
     await createVisit(cfg, visitPayload);
 
     setStatusBadge(
@@ -458,7 +447,6 @@ async function submitLead (evt) {
       visit_id ? `visit_id: ${visit_id}` : 'Visit created'
     );
 
-    // 2) Create Form lead
     await createFormLead(cfg, formPayload);
 
     setStatusBadge(
@@ -475,7 +463,7 @@ async function submitLead (evt) {
   } catch (err) {
     console.error('[submitLead] error', err);
     setStatusBadge('err', 'Submit failed', 'Visit or form-post error — see console');
-    alert('Lead submit failed — see console for details.');
+    alert('Lead submit failed — see console for details. Note, VPN required');
   }
 }
 
@@ -483,15 +471,15 @@ async function submitLead (evt) {
 
 function fillDemo () {
   $('#first_name').value = 'LocaliQ';
-  $('#last_name').value = 'Tester';
-  $('#email').value = 'localiq.tester@example.com';
-  $('#phone').value = '555-888-1234';
-  $('#address1').value = '123 Demo Street';
-  $('#address2').value = 'Apt 4B';
-  $('#city').value = 'Boston';
-  $('#state').value = 'MA';
+  $('#last_name').value  = 'Tester';
+  $('#email').value      = 'localiq.tester@example.com';
+  $('#phone').value      = '555-888-1234';
+  $('#address1').value   = '123 Demo Street';
+  $('#address2').value   = 'Apt 4B';
+  $('#city').value       = 'Boston';
+  $('#state').value      = 'MA';
   $('#postal_code').value = '02118';
-  $('#notes').value = 'QA form post lead for LIPS testing.';
+  $('#notes').value      = 'QA form post lead for LIPS testing.';
   $('#xhr_form_email').value = $('#email').value;
   $('#xhr_form_phone').value = $('#phone').value;
 }
@@ -516,6 +504,7 @@ function wirePresetButtons () {
       applyPresetToUI(key);
       const cfg = getCfg();
       applyCfgToURL(cfg);
+      dbglog('[preset-click]', cfg);
     });
   });
 }
