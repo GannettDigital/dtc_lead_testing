@@ -9,8 +9,8 @@ const PRESETS = {
     name: 'Orange Paper 8',
     label: 'Paid Lead A – Orange Paper 8',
     gmaid: 'USA_172716',
-    siteid: '427e4e5f-5317-42d8-825c-765b49e43028', // capture_code_uuid
-    scid: '3836844',               // PAID SCID
+    siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
+    scid: '3836844',
     campaignId: 'USA_2935655',
     masterCampaignId: '2935655',
     defaultReferrerType: 'PAID'
@@ -23,9 +23,9 @@ const PRESETS = {
     label: 'Organic Lead A – Orange Paper 8',
     gmaid: 'USA_172716',
     siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
-    scid: '3836845',               // DIFFERENT SCID, same campaign
-    campaignId: 'USA_2935655',
-    masterCampaignId: '2935655',
+    scid: '3836845',
+    campaignId: '',
+    masterCampaignId: '',
     defaultReferrerType: 'ORGANIC'
   },
 
@@ -36,7 +36,7 @@ const PRESETS = {
     label: 'Paid Lead B – Orange Paper 8',
     gmaid: 'USA_172716',
     siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
-    scid: '3862563',               // PAID SCID
+    scid: '3862563',
     campaignId: 'USA_3003640',
     masterCampaignId: '3003640',
     defaultReferrerType: 'PAID'
@@ -49,9 +49,9 @@ const PRESETS = {
     label: 'Organic Lead B – Orange Paper 8',
     gmaid: 'USA_172716',
     siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
-    scid: '3862564',               // DIFFERENT SCID, same campaign
-    campaignId: 'USA_3003640',
-    masterCampaignId: '3003640',
+    scid: '3862564',
+    campaignId: '',
+    masterCampaignId: '',
     defaultReferrerType: 'ORGANIC'
   },
 
@@ -64,8 +64,8 @@ const PRESETS = {
     name: 'Tracy Wong dealership',
     label: 'Paid Lead – Tracy Wong',
     gmaid: 'USA_142687',
-    siteid: '3eba9b50-4add-43e6-9fe7-b50322f0c149', // capture_code_uuid
-    scid: '2916748',                 // PAID SCID from USA_1699791
+    siteid: '3eba9b50-4add-43e6-9fe7-b50322f0c149',
+    scid: '2916748',
     campaignId: 'USA_1699791',
     masterCampaignId: '1302651',
     defaultReferrerType: 'PAID'
@@ -78,9 +78,9 @@ const PRESETS = {
     label: 'Organic Lead – Tracy Wong',
     gmaid: 'USA_142687',
     siteid: '3eba9b50-4add-43e6-9fe7-b50322f0c149',
-    scid: '2916731',                 // ORGANIC SCID from SEARCH bucket
-    campaignId: 'SEARCH',            // organic SEARCH campaign bucket
-    masterCampaignId: '1302640',
+    scid: '2916731',
+    campaignId: '',
+    masterCampaignId: '',
     defaultReferrerType: 'ORGANIC'
   },
 
@@ -94,8 +94,8 @@ const PRESETS = {
     name: "Jayanthi's Ferrari Dealership",
     label: 'Paid Lead – Jayanthi Ferrari',
     gmaid: 'USA_287373',
-    siteid: 'b12862cf-6ef3-4077-908f-363e038f391e', // capture_code_uuid
-    scid: '3936819',                 // PAID SCID from USA_3171338 (also in google_wpcids)
+    siteid: 'b12862cf-6ef3-4077-908f-363e038f391e',
+    scid: '3936819',
     campaignId: 'USA_3171338',
     masterCampaignId: '3171338',
     defaultReferrerType: 'PAID'
@@ -108,10 +108,9 @@ const PRESETS = {
     label: 'Organic Lead – Jayanthi Ferrari',
     gmaid: 'USA_287373',
     siteid: 'b12862cf-6ef3-4077-908f-363e038f391e',
-    scid: '3936820',                 // sibling SCID from same PAID campaign
-    campaignId: 'USA_3171338',
-    masterCampaignId: '3171338',
-    // Marked organic in our test harness, even though campaign_data says PAID
+    scid: '3936820',
+    campaignId: '',
+    masterCampaignId: '',
     defaultReferrerType: 'ORGANIC'
   }
 };
