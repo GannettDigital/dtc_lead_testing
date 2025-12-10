@@ -1,9 +1,9 @@
 (function () {
-  // Hardcoded defaults (match deverePaid preset)
+  // Hardcoded defaults (match orangePaidA preset)
   const PRESET_DEFAULT = {
     siteid: "427e4e5f-5317-42d8-825c-765b49e43028",
-    scid:   "4584989",             // from PRESETS.deverePaid.scid
-    gmaid:  "USA_172216"          // from PRESETS.deverePaid.gmaid
+    scid:   "3836844",             // from PRESETS.orangePaidA.scid
+    gmaid:  "USA_172716"          // from PRESETS.orangePaidA.gmaid
   };
 
   const qs = new URLSearchParams(location.search);
