@@ -1,64 +1,117 @@
 /* ========= PRESETS ========= */
 const PRESETS = {
   // ============================
-  // GMAID 1 – USA_172216 (DeVere)
+  // GMAID – USA_172716 (Orange Paper 8)
   // ============================
-
-  deverePaid: {
-    key: 'deverePaid',
+  orangePaidA: {
+    key: 'orangePaidA',
     channel: 'Paid',
-    name: 'DeVere Insulation',
-    label: 'Paid Lead – DeVere Insulation',
-    gmaid: 'USA_172216',
-    siteid: '61a53572-cd0e-4cc5-9451-66f19243563c', // capture_code_uuid
-    scid: '4584989', // picked first paid SCID
-    campaignId: 'USA_4972998',
-    masterCampaignId: '4392582',
+    name: 'Orange Paper 8',
+    label: 'Paid Lead A – Orange Paper 8',
+    gmaid: 'USA_172716',
+    siteid: '427e4e5f-5317-42d8-825c-765b49e43028', // capture_code_uuid
+    scid: '3836844',               // PAID SCID
+    campaignId: 'USA_2935655',
+    masterCampaignId: '2935655',
     defaultReferrerType: 'PAID'
   },
 
-  devereOrganic: {
-    key: 'devereOrganic',
+  orangeOrganicA: {
+    key: 'orangeOrganicA',
     channel: 'Organic',
-    name: 'DeVere Insulation (Organic)',
-    label: 'Organic Lead – DeVere Insulation',
-    gmaid: 'USA_172216',
-    siteid: '61a53572-cd0e-4cc5-9451-66f19243563c',
-    // fabricate organic by reusing a stable scid
-    scid: '4584990',
-    campaignId: 'USA_4972998',
-    masterCampaignId: '4392582',
+    name: 'Orange Paper 8 (Organic A)',
+    label: 'Organic Lead A – Orange Paper 8',
+    gmaid: 'USA_172716',
+    siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
+    scid: '3836845',               // DIFFERENT SCID, same campaign
+    campaignId: 'USA_2935655',
+    masterCampaignId: '2935655',
     defaultReferrerType: 'ORGANIC'
   },
 
-  // ==================================
-  // GMAID 2 – USA_336031 (SiblingTest)
-  // ==================================
-
-  siblingPaid: {
-    key: 'siblingPaid',
+  orangePaidB: {
+    key: 'orangePaidB',
     channel: 'Paid',
-    name: 'SiblingTestProd111',
-    label: 'Paid Lead – SiblingTestProd111',
-    gmaid: 'USA_336031',
-    siteid: 'fef441b5-eb77-4131-a21e-52d061bb8a4f',
-    scid: '4135926', // strongest paid SCID (also WPCID)
-    campaignId: 'USA_3599373',
-    masterCampaignId: '3599373',
+    name: 'Orange Paper 8',
+    label: 'Paid Lead B – Orange Paper 8',
+    gmaid: 'USA_172716',
+    siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
+    scid: '3862563',               // PAID SCID
+    campaignId: 'USA_3003640',
+    masterCampaignId: '3003640',
     defaultReferrerType: 'PAID'
   },
 
-  siblingOrganic: {
-    key: 'siblingOrganic',
+  orangeOrganicB: {
+    key: 'orangeOrganicB',
     channel: 'Organic',
-    name: 'SiblingTestProd111 (Organic)',
-    label: 'Organic Lead – SiblingTestProd111',
-    gmaid: 'USA_336031',
-    siteid: 'fef441b5-eb77-4131-a21e-52d061bb8a4f',
-    // fabricate organic: pick stable scid from 3599371 list
-    scid: '4135920',
-    campaignId: 'USA_3599371',
-    masterCampaignId: '3599371',
+    name: 'Orange Paper 8 (Organic B)',
+    label: 'Organic Lead B – Orange Paper 8',
+    gmaid: 'USA_172716',
+    siteid: '427e4e5f-5317-42d8-825c-765b49e43028',
+    scid: '3862564',               // DIFFERENT SCID, same campaign
+    campaignId: 'USA_3003640',
+    masterCampaignId: '3003640',
+    defaultReferrerType: 'ORGANIC'
+  },
+
+  // ============================
+  // GMAID – USA_142687 (Tracy Wong dealership)
+  // ============================
+  tracyPaid: {
+    key: 'tracyPaid',
+    channel: 'Paid',
+    name: 'Tracy Wong dealership',
+    label: 'Paid Lead – Tracy Wong',
+    gmaid: 'USA_142687',
+    siteid: '3eba9b50-4add-43e6-9fe7-b50322f0c149', // capture_code_uuid
+    scid: '2916748',                 // PAID SCID from USA_1699791
+    campaignId: 'USA_1699791',
+    masterCampaignId: '1302651',
+    defaultReferrerType: 'PAID'
+  },
+
+  tracyOrganic: {
+    key: 'tracyOrganic',
+    channel: 'Organic',
+    name: 'Tracy Wong dealership (Organic)',
+    label: 'Organic Lead – Tracy Wong',
+    gmaid: 'USA_142687',
+    siteid: '3eba9b50-4add-43e6-9fe7-b50322f0c149',
+    scid: '2916731',                 // ORGANIC SCID from SEARCH bucket
+    campaignId: 'SEARCH',            // organic SEARCH campaign bucket
+    masterCampaignId: '1302640',
+    defaultReferrerType: 'ORGANIC'
+  },
+
+  // ============================
+  // GMAID – USA_287373 (Jayanthi's Ferrari Dealership)
+  // ============================
+
+  jayanthiPaid: {
+    key: 'jayanthiPaid',
+    channel: 'Paid',
+    name: "Jayanthi's Ferrari Dealership",
+    label: 'Paid Lead – Jayanthi Ferrari',
+    gmaid: 'USA_287373',
+    siteid: 'b12862cf-6ef3-4077-908f-363e038f391e', // capture_code_uuid
+    scid: '3936819',                 // PAID SCID from USA_3171338 (also in google_wpcids)
+    campaignId: 'USA_3171338',
+    masterCampaignId: '3171338',
+    defaultReferrerType: 'PAID'
+  },
+
+  jayanthiOrganic: {
+    key: 'jayanthiOrganic',
+    channel: 'Organic',
+    name: "Jayanthi's Ferrari Dealership (Organic)",
+    label: 'Organic Lead – Jayanthi Ferrari',
+    gmaid: 'USA_287373',
+    siteid: 'b12862cf-6ef3-4077-908f-363e038f391e',
+    scid: '3936820',                 // sibling SCID from same PAID campaign
+    campaignId: 'USA_3171338',
+    masterCampaignId: '3171338',
+    // Marked organic in our test harness, even though campaign_data says PAID
     defaultReferrerType: 'ORGANIC'
   }
 };
@@ -71,7 +124,7 @@ const $$  = sel => Array.from(document.querySelectorAll(sel));
 const dbglog = (...args) => (window.__dbglog || console.log)(...args);
 
 // Single source of truth for the selected preset
-let currentPresetKey = 'deverePaid';
+let currentPresetKey = 'orangePaidA';
 
 /**
  * Simple tc generator (unix timestamp + 5 random digits)
@@ -104,9 +157,9 @@ function getCfg () {
 
   const presetKey = (currentPresetKey && PRESETS[currentPresetKey])
     ? currentPresetKey
-    : 'deverePaid';
+    : 'orangePaidA';
 
-  const preset = PRESETS[presetKey] || PRESETS.deverePaid;
+  const preset = PRESETS[presetKey] || PRESETS.orangePaidA;
 
   return {
     env,
@@ -125,7 +178,7 @@ function applyCfgToURL (cfg) {
 
   // Core
   params.set('env', (cfg.env || 'qa').toLowerCase());
-  params.set('preset', cfg.presetKey || 'deverePaid');
+  params.set('preset', cfg.presetKey || 'orangePaidA');
   params.set('dryrun', cfg.dryrun || '1');
 
   // Keep Capture-style params in sync, but *do not* read from them
@@ -145,7 +198,7 @@ function applyCfgToURL (cfg) {
  * (gmaid, scid, siteid) so you can see which IDs are in use.
  */
 function renderPresetDetail (presetKey) {
-  const preset = PRESETS[presetKey] || PRESETS.deverePaid;
+  const preset = PRESETS[presetKey] || PRESETS.orangePaidA;
   const metaEl = $('#presetMeta');
   const detailEl = $('#presetDetailBody');
 
@@ -184,7 +237,7 @@ function renderPresetDetail (presetKey) {
 }
 
 function applyPresetToUI (presetKey) {
-  const key = PRESETS[presetKey] ? presetKey : 'deverePaid';
+  const key = PRESETS[presetKey] ? presetKey : 'orangePaidA';
 
   // Update global preset state
   currentPresetKey = key;
@@ -206,9 +259,9 @@ function applyPresetToUI (presetKey) {
 function hydrateFormFromQS () {
   const initialEnv   = qs.get('env')    || 'qa';
   const initialDry   = qs.get('dryrun') || '1';
-  const initialKeyQS = qs.get('preset') || 'deverePaid';
+  const initialKeyQS = qs.get('preset') || 'orangePaidA';
 
-  const initialPresetKey = PRESETS[initialKeyQS] ? initialKeyQS : 'deverePaid';
+  const initialPresetKey = PRESETS[initialKeyQS] ? initialKeyQS : 'orangePaidA';
 
   currentPresetKey = initialPresetKey;
   applyPresetToUI(initialPresetKey);
@@ -455,11 +508,11 @@ async function submitLead (evt) {
       visit_id ? `visit_id: ${visit_id}` : 'Visit + form-post completed'
     );
 
-    alert(
-      'Form lead created via Visit + /api/v1/posts.\n\n' +
-      (visit_id ? `visit_id: ${visit_id}\n\n` : '') +
-      'Check Network Console for details.'
-    );
+    // alert(
+    //   'Form lead created via Visit + /api/v1/posts.\n\n' +
+    //   (visit_id ? `visit_id: ${visit_id}\n\n` : '') +
+    //   'Check Network Console for details.'
+    // );
   } catch (err) {
     console.error('[submitLead] error', err);
     setStatusBadge('err', 'Submit failed', 'Visit or form-post error — see console');
