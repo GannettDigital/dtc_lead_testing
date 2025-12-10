@@ -1,4 +1,3 @@
-/* ========= PRESETS ========= */
 const PRESETS = {
   // ============================
   // GMAID – USA_172716 (Orange Paper 8)
