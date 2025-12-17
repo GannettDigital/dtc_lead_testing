@@ -356,3 +356,15 @@ textarea{min-height:90px;resize:vertical;}
 .switch-right {
     align-self: flex-end;
 }
+
+.sms-consent {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sms-consent-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}

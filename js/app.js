@@ -150,7 +150,7 @@ function getCfg () {
     dryrun = dryRunEl.checked ? '1' : '0';
   } else {
     // fallback if checkbox is missing
-    dryrun = '1';
+    dryrun = '0';
   }
 
   const presetKey = (currentPresetKey && PRESETS[currentPresetKey])
@@ -177,7 +177,7 @@ function applyCfgToURL (cfg) {
   // Core
   params.set('env', (cfg.env || 'qa').toLowerCase());
   params.set('preset', cfg.presetKey || 'orangePaidA');
-  params.set('dryrun', cfg.dryrun || '1');
+  params.set('dryrun', cfg.dryrun ?? '0');
 
   // Keep Capture-style params in sync, but *do not* read from them
   params.set('scid', cfg.scid);
@@ -256,7 +256,7 @@ function applyPresetToUI (presetKey) {
  */
 function hydrateFormFromQS () {
   const initialEnv   = qs.get('env')    || 'qa';
-  const initialDry   = qs.get('dryrun') || '1';
+  const initialDry   = qs.get('dryrun') || '0';
   const initialKeyQS = qs.get('preset') || 'orangePaidA';
 
   const initialPresetKey = PRESETS[initialKeyQS] ? initialKeyQS : 'orangePaidA';
