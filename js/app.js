@@ -549,21 +549,6 @@ function fillDemo () {
   $('#xhr_form_phone').value = $('#phone').value;
 }
 
-// function fillDemo () {
-//   $('#first_name').value = 'LocaliQ';
-//   $('#last_name').value  = 'Tester';
-//   $('#email').value      = 'localiq.tester@example.com';
-//   $('#phone').value      = '555-888-1234';
-//   $('#address1').value   = '123 Demo Street';
-//   $('#address2').value   = 'Apt 4B';
-//   $('#city').value       = 'Boston';
-//   $('#state').value      = 'MA';
-//   $('#postal_code').value = '02118';
-//   $('#notes').value      = 'QA form post lead for LIPS testing.';
-//   $('#xhr_form_email').value = $('#email').value;
-//   $('#xhr_form_phone').value = $('#phone').value;
-// }
-
 function wireMirrors () {
   const pairs = [
     ['#email', '#xhr_form_email'],
