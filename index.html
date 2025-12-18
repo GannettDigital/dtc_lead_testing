@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>LIPS Lead Testing Sited</title>
+  <title>LIPS Lead Testing Site</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Styles -->
@@ -136,7 +136,7 @@
         </div>
         <div class="switch switch-right" title="When on, no visit/lead are created; payloads only log.">
           <span class="label">Dry-run</span>
-          <input type="checkbox" id="dryRun" checked />
+          <input type="checkbox" id="dryRun" />
         </div>
       </div>
       <div class="col-12">
@@ -200,11 +200,30 @@
         <textarea id="notes" name="notes" placeholder="Free-form text to help identify the test lead in LIPS…"></textarea>
       </div>
 
+      <!-- SMS Consent -->
+      <!-- Hiding for now - need to map the field name properly  -->
+      <div class="col-12 row sms-consent" style="display:none;">
+        <label class="sms-consent-label">
+          <input
+            type="checkbox"
+            name="input_7.1"
+            id="input_7_1"
+            value="1"
+          />
+          <span>Accept SMS Messaging</span>
+        </label>
+      </div>
+
       <div class="col-12 row" style="align-items:center; justify-content:flex-end;">
         <div class="row" style="gap:8px;">
           <span id="submitStatus" class="badge badge-hidden" aria-live="polite" title="Submission status"></span>
           <button type="button" class="btn" id="fillDemo">Fill demo data</button>
           <button type="submit" class="btn primary">Create Form Lead</button>
+        </div>
+      </div>
+      <div class="col-12 row" style="align-items:center; justify-content:flex-end;">
+        <div class="row" style="gap:8px;">
+          <div class="hint">No fields are required</div>
         </div>
       </div>
     </div>
@@ -232,6 +251,7 @@
 <!-- Scripts -->
 <script src="js/network-console.js"></script>
 <!--<script src="js/capture-bootstrap.js"></script>-->
+<script src="js/faker.umd.min.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

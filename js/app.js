@@ -121,6 +121,12 @@ const $   = sel => document.querySelector(sel);
 const $$  = sel => Array.from(document.querySelectorAll(sel));
 const dbglog = (...args) => (window.__dbglog || console.log)(...args);
 
+// Handle checkbox value for submit
+function getSmsConsent () {
+  const el = document.getElementById('input_7_1');
+  return el && el.checked ? '1' : '0';
+}
+
 // Single source of truth for the selected preset
 let currentPresetKey = 'orangePaidA';
 
@@ -150,7 +156,7 @@ function getCfg () {
     dryrun = dryRunEl.checked ? '1' : '0';
   } else {
     // fallback if checkbox is missing
-    dryrun = '1';
+    dryrun = '0';
   }
 
   const presetKey = (currentPresetKey && PRESETS[currentPresetKey])
@@ -177,7 +183,7 @@ function applyCfgToURL (cfg) {
   // Core
   params.set('env', (cfg.env || 'qa').toLowerCase());
   params.set('preset', cfg.presetKey || 'orangePaidA');
-  params.set('dryrun', cfg.dryrun || '1');
+  params.set('dryrun', cfg.dryrun ?? '0');
 
   // Keep Capture-style params in sync, but *do not* read from them
   params.set('scid', cfg.scid);
@@ -256,7 +262,7 @@ function applyPresetToUI (presetKey) {
  */
 function hydrateFormFromQS () {
   const initialEnv   = qs.get('env')    || 'qa';
-  const initialDry   = qs.get('dryrun') || '1';
+  const initialDry   = qs.get('dryrun') || '0';
   const initialKeyQS = qs.get('preset') || 'orangePaidA';
 
   const initialPresetKey = PRESETS[initialKeyQS] ? initialKeyQS : 'orangePaidA';
@@ -386,6 +392,9 @@ function buildFormPostBody (lead) {
     country:   'USA',                // contact_info.country
     message:   lead.notes,
 
+    // SMS consent
+    'input_7.1': getSmsConsent(),
+
     // Hidden/technical fields
     campaign_id:   '',
     campaign_name: '',
@@ -400,6 +409,11 @@ function buildFormPostPayload (cfg, lead, visitMeta) {
   const captureVersion   = 'LIPS_INTERIM_TEST';
   const nowHref          = location.href;
   const ref              = document.referrer || nowHref;
+
+  dbglog('[form-post] sms consent', {
+    field: 'input_7.1',
+    value: getSmsConsent()
+  });
 
   return {
     global_master_advertiser_id: cfg.gmaid,
@@ -519,18 +533,18 @@ async function submitLead (evt) {
 }
 
 /* ========= OTHER WIRES ========= */
-
 function fillDemo () {
-  $('#first_name').value = 'LocaliQ';
-  $('#last_name').value  = 'Tester';
-  $('#email').value      = 'localiq.tester@example.com';
-  $('#phone').value      = '555-888-1234';
-  $('#address1').value   = '123 Demo Street';
-  $('#address2').value   = 'Apt 4B';
-  $('#city').value       = 'Boston';
-  $('#state').value      = 'MA';
-  $('#postal_code').value = '02118';
-  $('#notes').value      = 'QA form post lead for LIPS testing.';
+  $('#first_name').value  = faker.name.firstName();
+  $('#last_name').value   = faker.name.lastName();
+  $('#email').value       = faker.internet.email().toLowerCase();
+  $('#phone').value       = faker.phone.phoneNumber('###-###-####');
+  $('#address1').value    = faker.address.streetAddress();
+  $('#address2').value    = Math.random() < 0.3 ? `Apt ${faker.random.number({ min: 1, max: 999 })}` : '';
+  $('#city').value        = faker.address.city();
+  $('#state').value       = faker.address.stateAbbr();
+  $('#postal_code').value = faker.address.zipCode('#####');
+  $('#notes').value       = `QA form post lead for LIPS testing.`;
+
   $('#xhr_form_email').value = $('#email').value;
   $('#xhr_form_phone').value = $('#phone').value;
 }
