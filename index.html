@@ -20,7 +20,7 @@
 
     <div class="grid" style="margin-top:10px;padding:2px">
       <!-- PRESET MATRIX -->
-      <div class="col-7">
+      <div class="col-8">
         <label class="preset-detail-header">Test accounts (Select One)</label>
 
         <!-- Paid vs Organic matrix -->
@@ -125,8 +125,8 @@
           </div>
         </div>
       </div>
-      <!-- ENVIRONMENT + METHOD + DRY-RUN -->
-      <div class="col-5 env-stack">
+      <!-- ENVIRONMENT + DRY-RUN -->
+      <div class="col-4 env-stack">
         <div class="env-col">
           <label for="cfg-env">Environment</label>
           <select id="cfg-env">
@@ -135,15 +135,7 @@
           </select>
         </div>
 
-        <!-- NEW: Preferred Contact Method -->
-        <div class="env-col">
-          <label for="preferredContactMethod">Preferred Contact Method</label>
-          <select id="preferredContactMethod">
-            <option value="" selected>—</option>
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-          </select>
-        </div>
+
 
         <!-- Keep Dry-run, but hide it (dev-only) -->
         <div class="switch switch-right dev-only" title="When on, no visit/lead are created; payloads only log.">
@@ -205,6 +197,16 @@
       <div class="col-4">
         <label for="postal_code">ZIP/Postal Code</label>
         <input id="postal_code" name="postal_code" autocomplete="postal-code" />
+      </div>
+
+      <!-- NEW: Preferred Contact Method -->
+      <div class="col-5">
+        <label for="preferredContactMethod">Preferred Contact Method</label>
+        <select id="preferredContactMethod">
+          <option value="" selected>—</option>
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+        </select>
       </div>
 
       <div class="col-12">
