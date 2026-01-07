@@ -368,3 +368,16 @@ textarea{min-height:90px;resize:vertical;}
     gap: 8px;
     white-space: nowrap;
 }
+
+/* Hide dev-only controls by default */
+.dev-only {
+    display: none !important;
+}
+
+/* To get them back during dev:
+   - add `class="show-dev"` on <body>
+   - or toggle it via devtools
+*/
+body.show-dev .dev-only {
+    display: flex !important;
+}

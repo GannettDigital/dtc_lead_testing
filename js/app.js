@@ -294,7 +294,8 @@ function buildLeadPayload () {
     city: $('#city').value.trim(),
     state: $('#state').value.trim(),
     postal_code: $('#postal_code').value.trim(),
-    notes: $('#notes').value.trim()
+    notes: $('#notes').value.trim(),
+    preferred_contact_method: ($('#preferredContactMethod')?.value || '').trim()
   };
 }
 
@@ -382,6 +383,7 @@ function buildFormPostBody (lead) {
     lastname:  lead.last_name,       // contact_info.last_name
     email:     lead.email,           // contact_info.email
     phone:     lead.phone,           // contact_info.phone_work
+    preferred_contact_method: lead.preferred_contact_method || '',
 
     // Address / contact_info
     address:   lead.address1,        // contact_info.address1
@@ -581,6 +583,7 @@ function init () {
 
   // Keep URL in sync on env/dryrun change
   $('#cfg-env')?.addEventListener('change', () => applyCfgToURL(getCfg()));
+  $('#preferredContactMethod')?.addEventListener('change', () => applyCfgToURL(getCfg()));
   $('#dryRun')?.addEventListener('change', () => applyCfgToURL(getCfg()));
 
   // Lead form + demo
