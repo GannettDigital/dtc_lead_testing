@@ -12,7 +12,8 @@ const PRESETS = {
     scid: '3836844',
     campaignId: 'USA_2935655',
     masterCampaignId: '2935655',
-    defaultReferrerType: 'PAID'
+    defaultReferrerSource: 'PAID',
+    defaultReferrerType: 'SEARCH'
   },
 
   orangeOrganicA: {
@@ -25,7 +26,8 @@ const PRESETS = {
     scid: '3836845',
     campaignId: '',
     masterCampaignId: '',
-    defaultReferrerType: 'ORGANIC'
+    defaultReferrerSource: 'ORGANIC',
+    defaultReferrerType: 'SEARCH'
   },
 
   orangePaidB: {
@@ -38,7 +40,8 @@ const PRESETS = {
     scid: '3862563',
     campaignId: 'USA_3003640',
     masterCampaignId: '3003640',
-    defaultReferrerType: 'PAID'
+    defaultReferrerSource: 'PAID',
+    defaultReferrerType: 'SEARCH'
   },
 
   orangeOrganicB: {
@@ -51,7 +54,8 @@ const PRESETS = {
     scid: '3862564',
     campaignId: '',
     masterCampaignId: '',
-    defaultReferrerType: 'ORGANIC'
+    defaultReferrerSource: 'ORGANIC',
+    defaultReferrerType: 'SEARCH'
   },
 
   // ============================
@@ -67,7 +71,8 @@ const PRESETS = {
     scid: '2916748',
     campaignId: 'USA_1699791',
     masterCampaignId: '1302651',
-    defaultReferrerType: 'PAID'
+    defaultReferrerSource: 'PAID',
+    defaultReferrerType: 'SEARCH'
   },
 
   tracyOrganic: {
@@ -80,7 +85,8 @@ const PRESETS = {
     scid: '2916731',
     campaignId: '',
     masterCampaignId: '',
-    defaultReferrerType: 'ORGANIC'
+    defaultReferrerSource: 'ORGANIC',
+    defaultReferrerType: 'SEARCH'
   },
 
   // ============================
@@ -97,7 +103,8 @@ const PRESETS = {
     scid: '3936819',
     campaignId: 'USA_3171338',
     masterCampaignId: '3171338',
-    defaultReferrerType: 'PAID'
+    defaultReferrerSource: 'PAID',
+    defaultReferrerType: 'SEARCH'
   },
 
   jayanthiOrganic: {
@@ -110,7 +117,8 @@ const PRESETS = {
     scid: '3936820',
     campaignId: '',
     masterCampaignId: '',
-    defaultReferrerType: 'ORGANIC'
+    defaultReferrerSource: 'ORGANIC',
+    defaultReferrerType: 'SEARCH'
   }
 };
 
@@ -234,6 +242,10 @@ function renderPresetDetail (presetKey) {
       <span class="kv-value">${preset.masterCampaignId || '—'}</span>
     </div>
     <div class="kv">
+      <span class="kv-label">Referrer source</span>
+      <span class="kv-value">${preset.defaultReferrerSource || 'DIRECT'}</span>
+    </div>
+    <div class="kv">
       <span class="kv-label">Referrer type</span>
       <span class="kv-value">${preset.defaultReferrerType || 'DIRECT'}</span>
     </div>
@@ -343,7 +355,7 @@ function buildVisitPayload (cfg) {
     campaign_id: cfg.campaignId || '',
     master_campaign_id: cfg.masterCampaignId || '',
 
-    referrer_source: cfg.defaultReferrerType || 'DIRECT',
+    referrer_source: cfg.defaultReferrerSource || 'DIRECT',
 
     vendor_transaction_id: '',
     id_creative_resource: ''
@@ -433,7 +445,7 @@ function buildFormPostPayload (cfg, lead, visitMeta) {
     campaign_id: cfg.campaignId || '',
     master_campaign_id: cfg.masterCampaignId || '',
     referrer_type: cfg.defaultReferrerType || 'DIRECT',
-    referrer_source: cfg.defaultReferrerType || 'DIRECT',
+    referrer_source: cfg.defaultReferrerSource || 'DIRECT',
     vendor_transaction_id: '',
     id_creative_resource: '',
 
