@@ -53,7 +53,8 @@ const PRESETS = {
     scid: '4584989',
     campaignId: 'USA_4972998',
     masterCampaignId: '4392582',
-    defaultReferrerType: 'PAID'     // or "ORGANIC"
+    defaultReferrerSource: 'PAID',  // or "ORGANIC"
+    defaultReferrerType: 'SEARCH'
   },
 
   demoOrganic: {
@@ -66,7 +67,8 @@ const PRESETS = {
     scid: null,                     // or some organic-friendly SCID if needed
     campaignId: null,
     masterCampaignId: null,
-    defaultReferrerType: 'ORGANIC'
+    defaultReferrerSource: 'ORGANIC',
+    defaultReferrerType: 'SEARCH'
   }
 };
 ```
@@ -165,7 +167,8 @@ Choose a campaign entry in campaign_data with non-empty scids:
 ```
  - campaignId → the key, e.g. "USA_4972998"
  - masterCampaignId → "4392582"
- - defaultReferrerType → "PAID"
+ - defaultReferrerSource → "PAID" (from referrer_type in the config)
+ - defaultReferrerType → "SEARCH" (the channel; sent as referrer_type, while the source is sent as referrer_source)
  - scid → pick one SCID (often a google_wpcid is a good choice)
 
 In this example, google_wpcids.wpcids includes "4584989" and "4584990", so choose "4584989".
@@ -181,12 +184,13 @@ demoPaid: {
   scid: '4584989',          // from campaign_data + google_wpcids
   campaignId: 'USA_4972998',
   masterCampaignId: '4392582',
-  defaultReferrerType: 'PAID'
+  defaultReferrerSource: 'PAID',
+  defaultReferrerType: 'SEARCH'
 }
 ```
 For Organic, you can:
  - Reuse the same gmaid + siteid.
- - Use defaultReferrerType: 'ORGANIC'.
+ - Use defaultReferrerSource: 'ORGANIC' and defaultReferrerType: 'SEARCH'.
  - Either:
    - Leave scid, campaignId, masterCampaignId as null, or
    -  Borrow a SCID/campaign from a PAID section but treat referrer as 'DIRECT' or 'ORGANIC' in your payload builder.
@@ -202,6 +206,7 @@ siblingOrganic: {
   scid: null,
   campaignId: null,
   masterCampaignId: null,
-  defaultReferrerType: 'ORGANIC'
+  defaultReferrerSource: 'ORGANIC',
+  defaultReferrerType: 'SEARCH'
 }
 ```
